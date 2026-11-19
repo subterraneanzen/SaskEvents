@@ -10,4 +10,4 @@ local.properties
 .DS_Store
 captures/
 *.keystore
-!android/app/debug-release.keystore
+!android/app/saskevents-release.keystore
