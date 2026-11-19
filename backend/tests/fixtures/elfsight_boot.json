@@ -1,0 +1,241 @@
+{
+ "status": 1,
+ "data": {
+  "widgets": {
+   "add1f5aa-e43d-45d8-ba0d-714ad4704f33": {
+    "status": 1,
+    "data": {
+     "app": "event-calendar",
+     "settings": {
+      "events": [
+       {
+        "id": "1ee9c3b8",
+        "name": "Booze & Glory w/ The No Goes & Guests - Saskatoon, SK",
+        "start": {
+         "type": "datetime",
+         "date": "2027-03-12",
+         "time": "21:00"
+        },
+        "end": {
+         "type": "datetime",
+         "date": "2027-03-12",
+         "time": "21:00"
+        },
+        "timeZone": "America/Regina",
+        "repeatPeriod": "noRepeat",
+        "description": "<div>StepKid Events Presents!</div><br><div>Booze &amp; Glory<br><a href=\"http://boozeandglory.com\">boozeandglory.com</a></div><br><div>The No Goes<br><a href=\"https://thenogoes.bandcamp.com\">https://thenogoes.bandcamp.com</a></div><br><div>More Guests TBA!</div><br><div>March 12 2027<br>Saskatoon, SK<br>Black Cat Tavern<br>Doors: 9:00PM<br>Ages: 19+<br>Tickets On Sale Monday! - <a href=\"https://show.ps/l/8e6cc1b0/\">https://show.ps/l/8e6cc1b0/</a></div>",
+        "coverImage": {
+         "url": "https://files.elfsightcdn.com/x/Booze-Gory-Square.jpg"
+        },
+        "eventType": [],
+        "location": [],
+        "tags": [],
+        "actions": [
+         {
+          "text": "GET TICKETS",
+          "link": {
+           "value": "https://show.ps/l/8e6cc1b0/"
+          }
+         }
+        ],
+        "video": {
+         "type": "youtube",
+         "id": "fzQvqdzSECM"
+        },
+        "isAllDay": false
+       },
+       {
+        "id": "a88e5290",
+        "name": "Drag Queen Trivia: Theme TBA!",
+        "start": {
+         "type": "datetime",
+         "date": "2026-11-18",
+         "time": "19:00"
+        },
+        "end": {
+         "type": "datetime",
+         "date": "2026-11-18",
+         "time": "19:00"
+        },
+        "repeatPeriod": "noRepeat",
+        "description": "<div>It\u2019s Drag Queen Trivia with Iona Whipp &amp; China White!!!</div>",
+        "coverImage": {
+         "url": "https://files.elfsightcdn.com/x/china.png"
+        },
+        "location": [],
+        "actions": [
+         {
+          "text": "DOOR COVER ONLY",
+          "link": {
+           "value": ""
+          }
+         }
+        ],
+        "isAllDay": false
+       },
+       {
+        "id": "dcc8a0af",
+        "name": "Truck Violence w/ Special Guests",
+        "start": {
+         "type": "datetime",
+         "date": "2026-11-19",
+         "time": "19:00"
+        },
+        "end": {
+         "type": "datetime",
+         "date": "2026-11-19",
+         "time": "19:00"
+        },
+        "repeatPeriod": "noRepeat",
+        "description": "<div>MODO-LIVE &amp; The Plant Present</div><br><div>Truck Violence</div><br><div>w/ Special Guests</div><br><div>November 19th 2026<br>Black Cat Tavern<br>Saskatoon, SK<br>Doors: 7pm<br>Ages: 19+ I.D. Required<br>Tickets: <a href=\"https://bit.ly/TruckViolence-SAS\">https://bit.ly/TruckViolence-SAS</a></div>",
+        "coverImage": {
+         "url": "https://files.elfsightcdn.com/x/tv.jpg"
+        },
+        "location": [],
+        "actions": [
+         {
+          "text": "GEET TICKETS",
+          "link": {
+           "value": "https://bit.ly/TruckViolence-SAS"
+          }
+         }
+        ],
+        "isAllDay": false
+       },
+       {
+        "id": "b9baf267",
+        "name": "Nameless Friends w/ Checkout Queens & Slutty Waist",
+        "start": {
+         "type": "datetime",
+         "date": "2026-11-20",
+         "time": "21:00"
+        },
+        "end": {
+         "type": "datetime",
+         "date": "2026-11-20",
+         "time": "21:00"
+        },
+        "repeatPeriod": "noRepeat",
+        "description": "<div>Nameless Friends is going on tour.</div><br><div>Nameless Friends - linktr.ee/namelessfriends</div><br><div>with SASKATOON support from:</div><br><div>Checkout Queens - linktr.ee/checkoutqueens</div>",
+        "coverImage": {
+         "url": "https://files.elfsightcdn.com/x/nf.jpg"
+        },
+        "location": [],
+        "actions": [
+         {
+          "text": "GET TICKETS",
+          "link": {
+           "value": "https://show.ps/l/ef0919ad/"
+          }
+         }
+        ]
+       },
+       {
+        "id": "484999ab",
+        "name": "Karaoke",
+        "start": {
+         "type": "datetime",
+         "date": "2026-12-03",
+         "time": "21:00"
+        },
+        "end": {
+         "type": "datetime",
+         "date": "2026-12-03",
+         "time": "21:00"
+        },
+        "repeatPeriod": "noRepeat",
+        "description": "<div>It's Karaoke Night!!</div>",
+        "location": [],
+        "actions": [
+         {
+          "text": "NO COVER",
+          "link": {
+           "value": ""
+          }
+         }
+        ]
+       },
+       {
+        "id": "louis1",
+        "name": "Protest the Hero",
+        "start": {
+         "type": "datetime",
+         "date": "2026-11-27",
+         "time": "19:00"
+        },
+        "end": {
+         "type": "datetime",
+         "date": "2026-11-27",
+         "time": "19:00"
+        },
+        "repeatPeriod": "noRepeat",
+        "description": "<div>Doors 7pm. 19+</div>",
+        "location": [
+         "m6helzl5"
+        ],
+        "actions": []
+       },
+       {
+        "id": "bf201de3",
+        "name": "Winterruption Ft. Homeboy Sandman, Shub & Handsome Tiger, LOGS",
+        "start": {
+         "type": "datetime",
+         "date": "2027-01-21",
+         "time": "20:00"
+        },
+        "end": {
+         "type": "datetime",
+         "date": "2027-01-21",
+         "time": "20:00"
+        },
+        "repeatPeriod": "noRepeat",
+        "description": "<div>Doors at 8pm<br>Show at 8:30pm<br>Venue: Black Cat Tavern<br></div>",
+        "location": [],
+        "actions": [
+         {
+          "text": "GET TICKETS",
+          "link": {
+           "value": "https://broadwaytheatre.ca/events?p=event&event=4317"
+          }
+         }
+        ]
+       },
+       {
+        "id": "old1",
+        "name": "Customer Service w/ The New Daydream",
+        "start": {
+         "type": "datetime",
+         "date": "2025-11-05",
+         "time": "19:00"
+        },
+        "end": {
+         "type": "datetime",
+         "date": "2025-11-05",
+         "time": "19:00"
+        },
+        "repeatPeriod": "noRepeat",
+        "description": "",
+        "location": [],
+        "actions": []
+       }
+      ],
+      "locations": [
+       {
+        "address": "801 Broadway Ave, Saskatoon, SK S7N 1B5",
+        "filterID": "black-cat-tavern",
+        "id": "m6h60bgm",
+        "name": "Black Cat Tavern"
+       },
+       {
+        "address": "University of Saskatchewan, Memorial Union Bldg, 93 Campus Dr Lower Level, Saskatoon, SK S7N 5A4",
+        "filterID": "louis'",
+        "id": "m6helzl5",
+        "name": "Louis'"
+       }
+      ]
+     }
+    }
+   }
+  }
+ }
+}

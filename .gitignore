@@ -1,0 +1,13 @@
+__pycache__/
+*.pyc
+.pytest_cache/
+/feed/
+.gradle/
+build/
+local.properties
+*.iml
+.idea/
+.DS_Store
+captures/
+*.keystore
+!android/app/debug-release.keystore

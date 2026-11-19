@@ -1,0 +1,183 @@
+{
+  "_comment": "Source registry (Source Manager). Add, edit, enable/disable sources here; no app update needed. tier: 1 official venue, 2 official artist, 3 official ticketing, 4 aggregator, 5 other secondary. frequencyHours is the minimum gap between checks. adapter must be one of: amigos_html, elfsight_calendar, broadway_platform, jsonld, ics, ticketmaster_api.",
+  "sources": [
+    {
+      "id": "amigos",
+      "name": "Amigos Cantina – Events & Concerts",
+      "url": "https://www.amigoscantina.com/events-and-concerts/",
+      "adapter": "amigos_html",
+      "tier": 1,
+      "venueId": "amigos-cantina",
+      "enabled": true,
+      "frequencyHours": 6,
+      "options": {"fetchDetails": true, "detailDaysAhead": 75},
+      "notes": "Official WordPress events list with per-event pages (description, age, ticket links). robots.txt allows all."
+    },
+    {
+      "id": "amigos-tickets",
+      "name": "Amigos Cantina – Ticket site",
+      "url": "https://tickets.amigoscantina.com/events",
+      "adapter": "broadway_platform",
+      "tier": 3,
+      "venueId": "amigos-cantina",
+      "enabled": true,
+      "frequencyHours": 12,
+      "options": {"defaultVenueId": "amigos-cantina"},
+      "notes": "Venue's own ticketing site (same platform as Broadway Theatre). Supplies ticket prices."
+    },
+    {
+      "id": "blackcat",
+      "name": "Black Cat Tavern – Events calendar",
+      "url": "https://blackcattavern.ca/#events",
+      "adapter": "elfsight_calendar",
+      "tier": 1,
+      "venueId": "black-cat-tavern",
+      "enabled": true,
+      "frequencyHours": 6,
+      "options": {
+        "widgetId": "add1f5aa-e43d-45d8-ba0d-714ad4704f33",
+        "pageUrl": "https://blackcattavern.ca/",
+        "locationVenueMap": {
+          "black-cat-tavern": "black-cat-tavern",
+          "louis'": "louis-pub",
+          "coors-event-centre": "coors-event-centre",
+          "louis'-loft": "louis-loft"
+        }
+      },
+      "notes": "Events are loaded client-side by an Elfsight Event Calendar widget. The adapter reads the widget's public JSON (the same data the page loads), so no HTML scraping is needed. The widget also lists shows the venue's promoters run at Louis' and Coors Event Centre; these are mapped to those venues, not to Black Cat."
+    },
+    {
+      "id": "broadway-theatre",
+      "name": "Broadway Theatre – Events",
+      "url": "https://broadwaytheatre.ca/events",
+      "adapter": "broadway_platform",
+      "tier": 1,
+      "venueId": "broadway-theatre",
+      "enabled": true,
+      "frequencyHours": 12,
+      "options": {"defaultVenueId": "broadway-theatre"},
+      "notes": "Server-rendered list with titles, dates, times, venue, starting prices and posters."
+    },
+    {
+      "id": "allevents-capitol",
+      "name": "AllEvents – Capitol (Saskatoon)",
+      "url": "https://allevents.in/saskatoon/capitol",
+      "adapter": "jsonld",
+      "tier": 4,
+      "enabled": true,
+      "frequencyHours": 12,
+      "options": {},
+      "notes": "schema.org Event JSON-LD embedded in the page. Discovery only, never treated as venue confirmation."
+    },
+    {
+      "id": "allevents-music",
+      "name": "AllEvents – Saskatoon music",
+      "url": "https://allevents.in/saskatoon/music",
+      "adapter": "jsonld",
+      "tier": 4,
+      "enabled": true,
+      "frequencyHours": 24,
+      "options": {},
+      "notes": "Additional AllEvents Saskatoon category page, expected to use the same JSON-LD format as the Capitol page. URL pattern assumed, not confirmed by hand; the ingest report shows whether it yields events."
+    },
+    {
+      "id": "bandsintown",
+      "name": "Bandsintown – Saskatoon",
+      "url": "https://www.bandsintown.com/c/saskatoon-sk",
+      "adapter": "jsonld",
+      "tier": 4,
+      "enabled": true,
+      "frequencyHours": 24,
+      "options": {},
+      "notes": "City page embeds schema.org MusicEvent JSON-LD. robots.txt allows generic crawlers on /c/. Official Bandsintown API is artist-scoped and needs an app_id agreement, so there is no city-wide API option. Page is behind Cloudflare and may block datacenter IPs; failures are recorded, not hidden."
+    },
+    {
+      "id": "songkick",
+      "name": "Songkick – Saskatoon metro area",
+      "url": "https://www.songkick.com/metro-areas/27391-canada-saskatoon",
+      "adapter": "jsonld",
+      "tier": 4,
+      "enabled": true,
+      "frequencyHours": 24,
+      "options": {"extraPages": ["https://www.songkick.com/metro-areas/27391-canada-saskatoon?page=2"]},
+      "notes": "Each listing has MusicEvent JSON-LD with venue geo and performer profiles. Songkick's partner API is closed to new applicants, so the public page's structured data is the permitted path. robots.txt allows metro-area pages for generic agents."
+    },
+    {
+      "id": "ticketmaster",
+      "name": "Ticketmaster Discovery API (Saskatoon area)",
+      "url": "https://app.ticketmaster.com/discovery/v2/events.json",
+      "adapter": "ticketmaster_api",
+      "tier": 3,
+      "enabled": true,
+      "frequencyHours": 24,
+      "options": {"latlong": "52.1333,-106.6833", "radiusKm": 60, "apiKeyEnv": "TICKETMASTER_API_KEY"},
+      "notes": "Official API, free key from developer.ticketmaster.com. Covers SaskTel Centre / TCU Place arena and theatre shows. Skipped (status=needs_api_key) until the TICKETMASTER_API_KEY repository secret is set."
+    },
+    {
+      "id": "spl-ical",
+      "name": "Saskatoon Public Library events (iCal)",
+      "url": "https://saskatoonlibrary.libnet.info/events",
+      "adapter": "ics",
+      "tier": 1,
+      "enabled": false,
+      "frequencyHours": 24,
+      "options": {},
+      "notes": "SPL uses Communico (libnet.info), whose event pages expose 'Add to Calendar' data in America/Regina time. The exact public feed URL was not confirmed during research, so the source is disabled until a feed URL is verified."
+    },
+    {
+      "id": "saskmusic",
+      "name": "SaskMusic – Live Music Listings",
+      "url": "https://www.saskmusic.org/events/live-music-listings",
+      "adapter": "manual",
+      "tier": 5,
+      "enabled": false,
+      "frequencyHours": 24,
+      "options": {},
+      "notes": "Province-wide listing with many smaller Saskatoon venues (Somewhere Else, Coors, Finns Pub @ Parktown). Markup not yet inspected; candidate for the next adapter."
+    },
+    {
+      "id": "discover-saskatoon",
+      "name": "Tourism Saskatoon – Events calendar",
+      "url": "https://www.discoversaskatoon.com/calendar-events",
+      "adapter": "manual",
+      "tier": 5,
+      "enabled": false,
+      "frequencyHours": 24,
+      "options": {},
+      "notes": "Strong for non-music events (markets, tours, museums, family, sports). Markup not yet inspected; candidate adapter."
+    },
+    {
+      "id": "showpass",
+      "name": "Showpass (Capitol Music Club, Black Cat, Amigos ticketing)",
+      "url": "https://www.showpass.com/api/public/discovery/",
+      "adapter": "manual",
+      "tier": 3,
+      "enabled": false,
+      "frequencyHours": 24,
+      "options": {},
+      "notes": "Showpass exposes a public JSON discovery API used by its widgets. Venue filtering was not verified, so it is disabled for now. Would add Capitol Music Club prices and age limits."
+    },
+    {
+      "id": "eventbrite-bassment",
+      "name": "Eventbrite – The Bassment organizer",
+      "url": "https://www.eventbrite.ca/o/the-bassment-18034302580",
+      "adapter": "manual",
+      "tier": 3,
+      "enabled": false,
+      "frequencyHours": 24,
+      "options": {},
+      "notes": "The Bassment sells all tickets on Eventbrite. The Eventbrite API needs a private token; Songkick already lists most Bassment shows."
+    },
+    {
+      "id": "facebook",
+      "name": "Facebook venue pages",
+      "url": "https://www.facebook.com/",
+      "adapter": "manual",
+      "tier": 5,
+      "enabled": false,
+      "frequencyHours": 0,
+      "options": {},
+      "notes": "Not integrated. Facebook's Graph API no longer gives third parties access to public Page events, and scraping is prohibited. The app shows Facebook event links when a venue's own listing supplies them (e.g. Amigos RSVP links)."
+    }
+  ]
+}

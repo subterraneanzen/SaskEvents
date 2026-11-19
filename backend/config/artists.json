@@ -1,0 +1,16 @@
+{
+  "_comment": "Hand-checked artist records. A listing is linked to one of these only when the name matches AND at least one matchHint corroborates it (same platform profile URL, an official link domain listed by the venue, a venue the act regularly plays, or its home city). Add entries only after checking the act's own website/socials. Similarly named acts get separate entries with a 'disambiguation' line.",
+  "example": {
+    "id": "a-example-band-saskatoon",
+    "name": "Example Band",
+    "aliases": [],
+    "disambiguation": "Saskatoon indie-rock trio (not the UK band of the same name)",
+    "description": null,
+    "genres": ["indie rock"],
+    "hometown": "Saskatoon, SK",
+    "members": [],
+    "links": ["https://exampleband.bandcamp.com"],
+    "matchHints": {"profileUrls": ["songkick.com/artists/000000"], "linkDomains": ["exampleband.bandcamp.com"], "venues": ["amigos-cantina"], "cities": ["Saskatoon"]}
+  },
+  "artists": []
+}
