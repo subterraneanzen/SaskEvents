@@ -64,7 +64,10 @@ def mb_links_for_profile(fetcher, profile: str) -> dict:
         u = (rel.get("url") or {}).get("resource")
         if not u or rel.get("ended") or rel.get("type") not in REL_OK:
             continue
-        if link_type(u) in WANTED and u not in links:
+        t = link_type(u)
+        if t == "website" and rel.get("type") != "official homepage":
+            continue  # store/streaming pages (iTunes, Deezer, Amazon...) are not useful previews
+        if t in WANTED and u not in links:
             links.append(u)
     return {"mbid": mbid, "name": art.get("name"), "disambiguation": art.get("disambiguation") or None, "links": links}
 
@@ -89,17 +92,30 @@ def enrich_artists(artists: list[dict], fetcher, cache_path: Path, prev_cache_pa
                 budget -= 1
                 stats["looked_up"] += 1
                 try:
-                    hit = {**mb_links_for_profile(fetcher, prof), "checked": now.isoformat(timespec="seconds")}
+                    hit = {**mb_links_for_profile(fetcher, prof), "v": 2, "checked": now.isoformat(timespec="seconds")}
                     cache[prof] = hit
                 except Exception as e:  # keep the stale entry, try again next run
                     stats["errors"] += 1
                     log.warning("musicbrainz lookup failed for %s: %s", prof, e)
             if not hit or not hit.get("mbid"):
                 continue
+            if hit.get("v") != 2:  # entries from the first version kept store links; refresh them
+                hit = None
+                if budget > 0 and fetcher is not None:
+                    budget -= 1
+                    try:
+                        hit = cache[prof] = {**mb_links_for_profile(fetcher, prof), "v": 2,
+                                             "checked": now.isoformat(timespec="seconds")}
+                    except Exception as e:
+                        stats["errors"] += 1
+                        log.warning("musicbrainz lookup failed for %s: %s", prof, e)
+                if not hit or not hit.get("mbid"):
+                    continue
             added = False
             for u in hit.get("links", []):
-                if any(l["url"].rstrip("/") == u.rstrip("/") for l in a["links"]):
-                    continue
+                t = link_type(u)
+                if t not in WANTED or any(l["type"] == t or l["url"].rstrip("/") == u.rstrip("/") for l in a["links"]):
+                    continue  # one link per platform is enough
                 a["links"].append({"type": link_type(u), "url": u,
                                    "provenance": "MusicBrainz entry that links to this act's " +
                                                  ("Songkick" if "songkick" in prof else "Bandsintown") + " profile"})

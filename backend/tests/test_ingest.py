@@ -223,6 +223,10 @@ def test_musicbrainz_enrichment(tmp_path):
                 {"type": "youtube", "url": {"resource": "https://www.youtube.com/channel/UC123"}},
                 {"type": "social network", "url": {"resource": "https://www.facebook.com/bandone"}},
                 {"type": "discogs", "url": {"resource": "https://www.discogs.com/artist/1"}},
+                {"type": "purchase for download", "url": {"resource": "https://itunes.apple.com/x"}},
+                {"type": "free streaming", "url": {"resource": "https://www.deezer.com/artist/1"}},
+                {"type": "youtube", "url": {"resource": "https://www.youtube.com/@second"}},
+                {"type": "official homepage", "url": {"resource": "https://bandone.ca/"}},
                 {"type": "social network", "ended": True, "url": {"resource": "https://www.instagram.com/old"}},
             ]}
             return r
@@ -235,11 +239,11 @@ def test_musicbrainz_enrichment(tmp_path):
     now = datetime(2026, 11, 19, tzinfo=timezone.utc)
     st = enrich_artists(arts, MBFetcher(), tmp_path / "c" / "mb.json", tmp_path / "prev.json", now=now)
     types = [l["type"] for l in arts[0]["links"]]
-    assert types == ["songkick", "bandcamp", "youtube", "facebook"]
+    assert types == ["songkick", "bandcamp", "youtube", "facebook", "website"]
     assert all("MusicBrainz" in l["provenance"] for l in arts[0]["links"][1:])
     assert len(arts[1]["links"]) == 1 and arts[2]["links"] == []
     assert st["enriched"] == 1 and st["errors"] == 0
     # Second run uses the cache (including the negative result) and adds no duplicates.
     calls = MBFetcher.calls
     enrich_artists(arts, MBFetcher(), tmp_path / "c" / "mb.json", tmp_path / "c" / "mb.json", now=now)
-    assert MBFetcher.calls == calls and len(arts[0]["links"]) == 4
+    assert MBFetcher.calls == calls and len(arts[0]["links"]) == 5
