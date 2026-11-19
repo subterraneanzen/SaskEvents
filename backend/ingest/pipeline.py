@@ -11,7 +11,7 @@ from zoneinfo import ZoneInfo
 
 from .artists import ArtistBook
 from .models import Performer, RawEvent
-from .normalize import infer_category, norm_name, norm_tokens, parse_age
+from .normalize import NOT_EVENTS, clean_title, infer_category, norm_name, norm_tokens, parse_age
 from .venues import VenueRegistry
 
 TZ = ZoneInfo("America/Regina")
@@ -106,6 +106,7 @@ class Builder:
         return int(self.sources.get(sid, {}).get("tier", 5))
 
     def build(self, raws: list[RawEvent], healthy_sources: set[str]) -> list[dict]:
+        raws = self._prepare(raws)
         venue_of: dict[int, Optional[str]] = {}
         for r in raws:
             venue_of[id(r)] = self.venues.resolve(r)
@@ -128,6 +129,32 @@ class Builder:
                 self.venues.used.add(e["venueId"])
         events.sort(key=lambda e: (e["startDate"], e["startTime"] or "99:99", e["title"].lower()))
         return events
+
+    def _prepare(self, raws: list[RawEvent]) -> list[RawEvent]:
+        out = []
+        # Coordinates shared by several differently named places are a city-level placeholder, not a venue location.
+        by_coord: dict[tuple, set] = {}
+        for r in raws:
+            if r.venue_lat is not None and r.venue_name:
+                by_coord.setdefault((round(r.venue_lat, 5), round(r.venue_lon, 5)), set()).add(norm_name(r.venue_name))
+        placeholders = {k for k, names in by_coord.items() if len(names) >= 3}
+        for r in raws:
+            if NOT_EVENTS.search(r.title):
+                continue
+            r.title, extra = clean_title(r.title)
+            for t in extra:
+                if t in ("cancelled", "postponed"):
+                    r.status = t
+                elif t not in r.tags:
+                    r.tags.append(t)
+            if r.venue_lat is not None and (round(r.venue_lat, 5), round(r.venue_lon, 5)) in placeholders:
+                r.venue_lat = r.venue_lon = None
+            # Festival listings without a venue put the festival name in the venue field.
+            if r.venue_name and not r.venue_id and norm_tokens(r.venue_name) and \
+                    norm_tokens(r.venue_name) <= norm_tokens(r.title) | {"2025", "2026", "2027", "2028", "festival"}:
+                r.venue_name = None
+            out.append(r)
+        return out
 
     def _merge(self, c: list[RawEvent], venue_id: Optional[str]) -> dict:
         primary = c[0]
@@ -201,7 +228,8 @@ class Builder:
                 source_name=self.sources.get(src.source_id, {}).get("name", src.source_id), source_tier=self.tier(src.source_id)))
         desc = vals.get("description")
         hint = next((r.category_hint for r in c if r.category_hint), None)
-        category, tags = infer_category(vals["title"], desc, hint, (venue or {}).get("type"), bool(perf_by))
+        category, tags = infer_category(vals["title"], desc, hint, (venue or {}).get("type"), bool(perf_by),
+                                        music_venue=bool((venue or {}).get("hostsLiveMusic")))
         for r in c:
             tags = sorted(set(tags) | set(r.tags))
         age = vals.get("age_text") or parse_age(desc)

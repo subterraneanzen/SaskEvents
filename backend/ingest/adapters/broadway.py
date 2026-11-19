@@ -15,6 +15,20 @@ from ..models import Performer, RawEvent
 from ..normalize import detect_status, html_to_text, parse_age, parse_clock, parse_doors, performers_from_title
 
 
+_VENUE_RE = [
+    re.compile(r"\bVenue:\s*(?:The\s+)?([A-Z][^\n.(]{2,50}?)\s*(?:\(|\.|\n|\s+\d{1,2}\+|\s+all ages|$)", re.I),
+    re.compile(r"(?:^|[.\n]\s*)At\s+(?:The\s+)?([A-Z][A-Za-z'’ ]{3,40}?)(?:\s+\d{1,2}\+|\s*\.|\n|\s{2}|$)"),
+]
+
+
+def venue_from_description(desc):
+    for rx in _VENUE_RE:
+        m = rx.search(desc or "")
+        if m:
+            return m.group(1).strip(" .")
+    return None
+
+
 def parse_listing(html: str, source: dict) -> list[RawEvent]:
     soup = BeautifulSoup(html, "lxml")
     out: list[RawEvent] = []
@@ -36,7 +50,7 @@ def parse_listing(html: str, source: dict) -> list[RawEvent]:
         if len(lines) > 1:
             parts = lines[1].split("/", 1)
             t = parse_clock(parts[0])
-            venue_name = parts[1].strip() if len(parts) > 1 else None
+            venue_name = (parts[1].strip() or None) if len(parts) > 1 else None
         a = card.select_one("a[href*='p=event']")
         href = urljoin(source["url"], a["href"]) if a else source["url"]
         ev_id = parse_qs(urlparse(href).query).get("event", [href])[0]
@@ -55,7 +69,9 @@ def parse_listing(html: str, source: dict) -> list[RawEvent]:
                 prices.append(float(m.group(1)))
         img = card.select_one("img")
         default_venue = source.get("options", {}).get("defaultVenueId")
-        # The card names the venue ("8:00 PM / Black Cat Tavern"); only fall back to the site's venue when absent.
+        if not venue_name:
+            venue_name = venue_from_description(desc)
+        # The card or description names the venue; only fall back to the site's own venue when neither does.
         venue_id = default_venue if not venue_name else None
         ev = RawEvent(
             source_id=source["id"],

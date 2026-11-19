@@ -144,11 +144,11 @@ def detect_status(*texts: Optional[str]) -> str:
 
 
 # ---------- performers from titles ----------
-_SPLIT = re.compile(r"\s+(?:w/|with|ft\.?|feat\.?|featuring|and guests?|\+)\s+|\s*,\s*|\s+/\s+", re.I)
+_SPLIT = re.compile(r"\s+(?:w/|with|ft\.?|feat\.?|featuring|and guests?|\+)\s+|\s*,\s*|\s+/\s+|\s+\|\s+", re.I)
 _NON_PERFORMER = re.compile(
     r"\b(trivia|bingo|karaoke|night|party|festival|fest|presents?|tour|show|release|open mic|jam|"
     r"comedy|tickets?|tba|guests?|special|edition|live at|xmas|christmas|new year|art nite|dj night|"
-    r"close out|celebration|brunch|market|workshop|sold out)\b",
+    r"close out|celebration|brunch|market|workshop|sold out|winterruption|cancell?ed|postponed|\d+\s*[ap]m)\b",
     re.I,
 )
 
@@ -188,10 +188,11 @@ _RULES: list[tuple[str, str, list[str]]] = [
     ("community", r"\b(trivia|bingo|pop quiz|quiz night|meet ?up|fundraiser|gala|drag)\b", []),
     ("other_music", r"\b(dj|karaoke|rave|club night|dance party|day party|daytime clubbing|emo night)\b", []),
     ("arts_culture", r"\b(exhibit|exhibition|gallery|art nite|art night|film|screening|cinema|museum|lecture|talk|reading|poetry|story slam)\b", []),
-    ("live_music", r"\b(band|concert|live music|tour|w/|songwriter|ep release|album|tribute|jazz|blues|orchestra|symphony|quartet|quintet|trio|choir|acoustic|bluegrass|folk|rock|punk|metal|hip hop|country|piano|guitar|unplugged|in concert)\b", []),
-    ("festival", r"\b(festival|fest)\b", ["festival"]),
-    ("seasonal", r"\b(christmas|xmas|halloween|new year|easter|canada day|winter festival|solstice)\b", []),
+    ("live_music", r"(?:^|\s)w/\s|\b(band|concert|live music|tour|songwriter|ep release|album|tribute|jazz|blues|orchestra|symphony|quartet|quintet|trio|choir|acoustic|bluegrass|folk|rock|punk|metal|hip hop|country|piano|guitar|unplugged|in concert)\b", []),
+    ("festival", r"\b(festival|fest|winterruption|folkfest|jazzfest)\b", ["festival"]),
 ]
+_SEASONAL = r"\b(christmas|xmas|halloween|new year|easter|canada day|winter festival|solstice|holiday)\b"
+_MUSIC_WORDS = r"\b(band|singer|songwriter|album|record|music|musician|guitar|tour|concert|tribute|songs?|vocal|jazz|blues|folk|rock|country|orchestra|trio|quartet|dj|hip hop|rapper|producer)\b"
 
 _TAG_RULES = [
     ("dj", r"\bdj\b"), ("open_mic", r"open mic"), ("jam", r"\bjam\b|jam session"), ("karaoke", r"karaoke"),
@@ -204,28 +205,60 @@ _TAG_RULES = [
 
 
 def infer_category(title: str, description: Optional[str], hint: Optional[str], venue_type: Optional[str],
-                   has_performers: bool) -> tuple[str, list[str]]:
+                   has_performers: bool, music_venue: bool = False) -> tuple[str, list[str]]:
+    """Title is the strongest signal; structured hints (MusicEvent) beat weak title words; description last."""
     title_l = title.lower()
-    desc_l = (description or "")[:600].lower()
+    desc_l = (description or "")[:800].lower()
     tags: list[str] = []
     for tag, rx in _TAG_RULES:
         if re.search(rx, title_l) or re.search(rx, desc_l[:300]):
             tags.append(tag)
-    # Title is the strongest signal.
+    if re.search(_SEASONAL, title_l):
+        tags.append("seasonal")
+    weak_vs_music = {"family", "workshop", "sports", "community", "market", "arts_culture"}
     for cat, rx, extra in _RULES:
         if re.search(rx, title_l, re.I):
-            if cat == "festival" and (hint == "live_music" or has_performers):
-                return "live_music", sorted(set(tags + ["festival"]))
-            if cat == "seasonal" and (hint == "live_music" or has_performers):
+            if cat == "festival":
+                if hint == "live_music" or has_performers or re.search(_MUSIC_WORDS, desc_l):
+                    return "live_music", sorted(set(tags + ["festival"]))
+                return "festival", sorted(set(tags + extra))
+            if hint == "live_music" and cat in weak_vs_music:
                 return "live_music", sorted(set(tags))
             return cat, sorted(set(tags + extra))
     if hint in CATEGORIES:
         return hint, sorted(set(tags))
+    # Description: music first at music venues (bios mention hockey, kids, classes...).
+    if (music_venue or has_performers) and re.search(_MUSIC_WORDS, desc_l):
+        return "live_music", sorted(set(tags))
     for cat, rx, extra in _RULES:
+        if cat in ("sports", "family", "workshop", "market") and music_venue:
+            continue  # too easily triggered by artist bios
         if re.search(rx, desc_l, re.I):
-            if cat in ("festival", "seasonal") and has_performers:
-                return "live_music", sorted(set(tags))
+            if cat == "festival" and has_performers:
+                return "live_music", sorted(set(tags + ["festival"]))
             return cat, sorted(set(tags + extra))
+    if "seasonal" in tags:
+        return "seasonal", sorted(set(tags))
     if venue_type in ("music_venue",) or (has_performers and venue_type in ("bar", "bar_restaurant", "bar_campus", "brewery")):
         return "live_music", sorted(set(tags))
     return "other", sorted(set(tags))
+
+
+_TITLE_NOISE = re.compile(r"\s*(?:[-–|!]\s*)?\b(sold out!?|cancell?ed!?|postponed!?)\s*!?\s*$", re.I)
+
+
+def clean_title(title: str) -> tuple[str, list[str]]:
+    """Strip trailing status words from titles ("X - Sold Out!") and return them as tags."""
+    tags = []
+    t = title.strip()
+    while True:
+        m = _TITLE_NOISE.search(t)
+        if not m or m.start() == 0:
+            break
+        w = m.group(1).lower()
+        tags.append("sold_out" if "sold" in w else w.rstrip("!").replace("canceled", "cancelled"))
+        t = t[:m.start()].rstrip(" -–|!")
+    return t, tags
+
+
+NOT_EVENTS = re.compile(r"\b(season pass|gift card|gift certificate|membership|subscription package)\b", re.I)

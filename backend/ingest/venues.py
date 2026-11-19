@@ -22,6 +22,23 @@ def haversine_km(a_lat, a_lon, b_lat, b_lon) -> float:
     return 2 * r * math.asin(math.sqrt(h))
 
 
+_ORD = {"first": "1", "second": "2", "third": "3", "fourth": "4", "fifth": "5"}
+
+
+def address_key(addr: Optional[str]) -> Optional[str]:
+    """'244 1st Ave N, Saskatoon' and '244 1st Ave North' -> '244|1|ave'. None if no civic number."""
+    if not addr:
+        return None
+    m = re.match(r"\s*(?:\w+-)?(\d{1,5})\s+([A-Za-z0-9]+)\s*([A-Za-z]+)?", addr)
+    if not m:
+        return None
+    street = m.group(2).lower()
+    street = _ORD.get(street, re.sub(r"(st|nd|rd|th)$", "", street) if re.match(r"\d", street) else street)
+    kind = (m.group(3) or "").lower()[:2]
+    kind = {"av": "av", "st": "st", "dr": "dr", "cr": "cr", "bl": "bl", "rd": "rd"}.get(kind, kind)
+    return f"{m.group(1)}|{street}|{kind}"
+
+
 class VenueRegistry:
     def __init__(self, config: dict, previous_venues: Optional[list[dict]] = None):
         self.city = config["city"]
@@ -33,6 +50,11 @@ class VenueRegistry:
             v["provisional"] = False
             self.venues[v["id"]] = v
         self._index: dict[str, str] = {}
+        self._addr: dict[str, str] = {}
+        for vid, v in self.venues.items():
+            k = address_key(v.get("address"))
+            if k:
+                self._addr[k] = vid
         for vid, v in self.venues.items():
             for n in [v["name"]] + v.get("aliases", []):
                 self._index[norm_name(n)] = vid
@@ -70,6 +92,12 @@ class VenueRegistry:
             if vid:
                 self._absorb_geo(vid, ev)
                 return vid
+        # Street-address match ("244 1st Ave North" -> Capitol Music Club).
+        for cand in (ev.venue_address, name):
+            k = address_key(cand)
+            if k and k in self._addr:
+                self._absorb_geo(self._addr[k], ev)
+                return self._addr[k]
         # Geo proximity with a shared name token.
         if ev.venue_lat is not None and name:
             toks = norm_tokens(name)
