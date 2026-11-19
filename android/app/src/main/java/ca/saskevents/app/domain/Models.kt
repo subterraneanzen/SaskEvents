@@ -104,6 +104,7 @@ enum class EventStatus(val key: String, val label: String?) {
 enum class Identity(val key: String, val label: String, val explanation: String) {
     VERIFIED("verified", "Verified artist", "Matched to a hand-checked profile using more than the name."),
     VENUE_LINKED("venue_linked", "Links from venue", "Links were placed next to this name by the venue's own listing."),
+    MATCHED("matched", "Matched from listing", "Details in the listing (such as the act's hometown) matched one public music profile, which links these pages."),
     AGGREGATOR_LINKED("aggregator_linked", "Platform profile", "A listing platform attached its artist profile to this event. Other links have not been checked."),
     UNVERIFIED("unverified", "Not verified", "Only the name is known. Several acts may share it, so no profiles are linked.");
 

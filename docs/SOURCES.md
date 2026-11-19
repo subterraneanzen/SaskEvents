@@ -54,6 +54,27 @@ Each act gets **Listen & preview** buttons in the app (YouTube, Bandcamp, Spotif
   Facebook, Spotify, SoundCloud and website relations are then added with provenance. Matching is never by name.
 * **Outlined button:** a search on that site for the act's name, labelled as a search in the app.
 
+### Links found through the listing itself (`enrich_from_listings`)
+
+Smaller acts rarely have Songkick profiles, so the event listing is used too (code: `ingest/artist_links.py`):
+
+1. **Links in the event description.** Venue pages often add the act's links ("LISTEN: dumpbabes.bandcamp.com").
+   A link goes to a performer when its text is the performer's name, when its account name spells the name
+   (`dumpbabes` = Dump Babes, `sharptailmusic` = Sharptail), or when it sits in a paragraph that names only that
+   act. Ticket, venue, share and Facebook *event* links are skipped. From aggregators (tier 3+) only the
+   account-name rule is trusted.
+2. **The act's own page.** A linked Bandcamp page (its "band links" list), website or Linktree is read for the
+   act's Facebook, Instagram, YouTube and other profiles (robots.txt respected). If a site links two Facebook
+   pages, only the one whose account name matches the act is kept.
+3. **Stated hometown.** "Two-time JUNO winners from Winnipeg", "a Regina-based band", "(Calgary, AB)": the place
+   is matched against MusicBrainz. Links are added only when **exactly one** MusicBrainz artist with that exact
+   name is from that city or its province/state (or, if MusicBrainz records only the country, when no other
+   artist anywhere has the name). Such acts show as **Matched from listing**. A clearly stated hometown is shown
+   on the artist page even when no profile could be matched.
+
+Facebook itself is never searched or scraped; Facebook links come only from the listing, the act's own pages or
+MusicBrainz. Cached in `feed/cache/artist-links.json` for 21 days, at most 150 lookups per run.
+
 Lookups are cached in `feed/cache/musicbrainz.json` (30 days when found, 10 days when not), stay within the
 MusicBrainz limit of 1 request per second, and use at most 120 lookups per run. Turn off with `--no-enrich`.
 Local acts that MusicBrainz doesn't know can be added by hand to `backend/config/artists.json` with their

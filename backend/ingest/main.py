@@ -20,7 +20,7 @@ from pathlib import Path
 
 from .adapters import ADAPTERS
 from .adapters.ticketmaster import MissingApiKey
-from .enrich import enrich_artists
+from .enrich import enrich_artists, enrich_from_listings
 from .http import Fetcher, RobotsDisallowed
 from .pipeline import Builder, raw_from_json, raw_to_json
 from .venues import VenueRegistry
@@ -131,6 +131,11 @@ def run(config_dir: Path, prev_dir: Path, out_dir: Path, *, force: bool = False,
         st_enrich = enrich_artists(artists, fetcher, out_dir / "cache" / "musicbrainz.json",
                                    prev_dir / "cache" / "musicbrainz.json", now=now)
         log.info("artist links from MusicBrainz: %s", st_enrich)
+        st_listing = enrich_from_listings(artists, fetcher, out_dir / "cache" / "artist-links.json",
+                                          prev_dir / "cache" / "artist-links.json", now=now, budget=80)
+        log.info("artist links from listings: %s", st_listing)
+    for a in artists:
+        a.pop("_places", None)
     for s in states:
         s["eventsInFeed"] = sum(1 for e in events if any(x["sourceId"] == s["id"] for x in e["sources"]))
 

@@ -64,7 +64,9 @@ removal.
 **Artist identification.** Names are never matched to profiles by name alone.
 `verified` requires a curated record plus an independent corroborating detail (same platform profile, official
 link domain listed by the venue, regular venue, or home city). `venue_linked` means the official venue listing put
-the link next to that name. `aggregator_linked` means a platform attached its own profile to this event; only
+the link next to that name (in the description too: anchor text is the name, the account name spells the act's
+name, or the link sits in a paragraph about only that act). `matched` means the listing's stated hometown ("from
+Winnipeg", "Regina-based") matched exactly one MusicBrainz artist of that exact name. `aggregator_linked` means a platform attached its own profile to this event; only
 that profile page is linked. `unverified` acts get no external links, and their records are scoped per venue so
 identically named acts elsewhere are never merged.
 

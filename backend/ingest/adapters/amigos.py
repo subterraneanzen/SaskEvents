@@ -13,6 +13,7 @@ from typing import Optional
 
 from bs4 import BeautifulSoup
 
+from ..artist_links import attach_listing_links
 from ..models import Performer, RawEvent
 from ..normalize import detect_status, html_to_text, parse_age, parse_clock, parse_doors, performers_from_title, find_price_in_text, parse_price
 
@@ -78,6 +79,7 @@ def apply_detail(ev: RawEvent, html: str) -> None:
     desc_el = soup.select_one(".single-event .event-description") or soup.select_one(".event-description")
     if desc_el:
         ev.description = html_to_text(str(desc_el))
+        attach_listing_links(ev.performers, str(desc_el), exclude_domains=["amigoscantina.com"])
     t = soup.select_one(".single-event a.event-tickets") or soup.select_one("a.event-tickets")
     if t and t.get("href"):
         ev.ticket_url = t["href"]

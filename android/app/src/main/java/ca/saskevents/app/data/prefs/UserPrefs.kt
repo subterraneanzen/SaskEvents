@@ -32,6 +32,7 @@ data class Settings(
     val includeSurrounding: Boolean = true,
     val preferredCategories: Set<String> = emptySet(),
     val defaultView: String = "agenda", // agenda | calendar
+    val themeMode: String = "system", // system | light | dark
     val syncHours: Int = 12,
     val wifiOnly: Boolean = false,
     val notifications: Boolean = false,  // off by default
@@ -56,6 +57,7 @@ class UserPrefs(private val context: Context) {
         val surrounding = booleanPreferencesKey("include_surrounding")
         val preferred = stringSetPreferencesKey("preferred_categories")
         val view = stringPreferencesKey("default_view")
+        val theme = stringPreferencesKey("theme_mode")
         val syncHours = intPreferencesKey("sync_hours")
         val wifiOnly = booleanPreferencesKey("wifi_only")
         val notify = booleanPreferencesKey("notifications")
@@ -80,6 +82,7 @@ class UserPrefs(private val context: Context) {
             includeSurrounding = p[K.surrounding] ?: true,
             preferredCategories = p[K.preferred] ?: emptySet(),
             defaultView = p[K.view] ?: "agenda",
+            themeMode = p[K.theme] ?: "system",
             syncHours = p[K.syncHours] ?: 12,
             wifiOnly = p[K.wifiOnly] ?: false,
             notifications = p[K.notify] ?: false,
@@ -116,6 +119,9 @@ class UserPrefs(private val context: Context) {
     suspend fun setIncludeSurrounding(v: Boolean) = context.dataStore.edit { it[K.surrounding] = v }
     suspend fun setPreferred(v: Set<String>) = context.dataStore.edit { it[K.preferred] = v }
     suspend fun setDefaultView(v: String) = context.dataStore.edit { it[K.view] = v }
+    suspend fun setThemeMode(v: String) = context.dataStore.edit { it[K.theme] = v }
+    /** Just the theme setting, so the activity can follow it without recomposing on every other change. */
+    val themeMode: Flow<String> = context.dataStore.data.map { it[K.theme] ?: "system" }
     suspend fun setSyncHours(v: Int) = context.dataStore.edit { it[K.syncHours] = v }
     suspend fun setWifiOnly(v: Boolean) = context.dataStore.edit { it[K.wifiOnly] = v }
     suspend fun setNotifications(v: Boolean) = context.dataStore.edit { it[K.notify] = v }

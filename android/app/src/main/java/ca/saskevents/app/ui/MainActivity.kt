@@ -4,7 +4,10 @@ import android.content.Intent
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.activity.SystemBarStyle
 import androidx.activity.enableEdgeToEdge
+import androidx.compose.foundation.isSystemInDarkTheme
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
@@ -49,6 +52,7 @@ import ca.saskevents.app.ui.settings.SettingsScreen
 import ca.saskevents.app.ui.settings.SourcesScreen
 import ca.saskevents.app.ui.theme.Palette
 import ca.saskevents.app.ui.theme.SaskEventsTheme
+import ca.saskevents.app.ui.theme.ThemeMode
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.MutableStateFlow
 import java.time.LocalDate
@@ -60,7 +64,23 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         pendingEvent.value = intent?.getStringExtra(EXTRA_EVENT_ID)
-        setContent { SaskEventsTheme { AppRoot(pendingEvent) } }
+        val prefs = (application as SaskEventsApp).container.prefs
+        setContent {
+            val mode by prefs.themeMode.collectAsState(initial = ThemeMode.SYSTEM)
+            val dark = when (mode) {
+                ThemeMode.DARK -> true
+                ThemeMode.LIGHT -> false
+                else -> isSystemInDarkTheme()
+            }
+            // Status/navigation bar icons follow the app theme, not only the system setting.
+            DisposableEffect(dark) {
+                val bar = if (dark) SystemBarStyle.dark(android.graphics.Color.TRANSPARENT)
+                else SystemBarStyle.light(android.graphics.Color.TRANSPARENT, android.graphics.Color.TRANSPARENT)
+                enableEdgeToEdge(statusBarStyle = bar, navigationBarStyle = bar)
+                onDispose {}
+            }
+            SaskEventsTheme(mode) { AppRoot(pendingEvent) }
+        }
     }
 
     override fun onNewIntent(intent: Intent) {

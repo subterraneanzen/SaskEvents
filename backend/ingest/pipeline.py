@@ -9,6 +9,7 @@ from datetime import date, datetime, time, timedelta, timezone
 from typing import Optional
 from zoneinfo import ZoneInfo
 
+from .artist_links import hometowns_for_performers
 from .artists import ArtistBook
 from .models import Performer, RawEvent
 from .normalize import NOT_EVENTS, clean_title, infer_category, norm_name, norm_tokens, parse_age
@@ -221,13 +222,17 @@ class Builder:
             basis = f"{venue_id or primary.venue_name or ''}|{primary.start_date}|{norm_name(primary.title)}"
             ev_id = "e-" + hashlib.sha1(basis.encode()).hexdigest()[:12]
         municipality = (venue or {}).get("municipality")
+        desc = vals.get("description")
+        # Where the listing says each act is from ("from Winnipeg", "Regina-based ..."); checked later against MusicBrainz.
+        places = hometowns_for_performers("\n\n".join(dict.fromkeys(r.description for r in c if r.description)),
+                                          [p.name for p in perf_by.values()])
         perf_ids = []
         for k, p in perf_by.items():
             src = perf_src[k]
             perf_ids.append(self.artists.resolve(
                 p, event_id=ev_id, venue_id=venue_id, municipality=municipality,
-                source_name=self.sources.get(src.source_id, {}).get("name", src.source_id), source_tier=self.tier(src.source_id)))
-        desc = vals.get("description")
+                source_name=self.sources.get(src.source_id, {}).get("name", src.source_id), source_tier=self.tier(src.source_id),
+                places=places.get(p.name, [])))
         hint = next((r.category_hint for r in c if r.category_hint), None)
         category, tags = infer_category(vals["title"], desc, hint, (venue or {}).get("type"), bool(perf_by),
                                         music_venue=bool((venue or {}).get("hostsLiveMusic")))

@@ -11,6 +11,7 @@ from urllib.parse import parse_qs, urljoin, urlparse
 
 from bs4 import BeautifulSoup
 
+from ..artist_links import attach_listing_links
 from ..models import Performer, RawEvent
 from ..normalize import detect_status, html_to_text, parse_age, parse_clock, parse_doors, performers_from_title
 
@@ -95,6 +96,8 @@ def parse_listing(html: str, source: dict) -> list[RawEvent]:
             tags=["sold_out"] if sold_out else [],
         )
         ev.performers = [Performer(name=n) for n in performers_from_title(title)]
+        if desc_el:
+            attach_listing_links(ev.performers, str(desc_el), exclude_domains=["broadwaytheatre.ca"])
         out.append(ev)
     return out
 

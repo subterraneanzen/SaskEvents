@@ -57,6 +57,7 @@ import ca.saskevents.app.sync.SyncWorker
 import ca.saskevents.app.ui.appViewModel
 import ca.saskevents.app.ui.components.SectionLabel
 import ca.saskevents.app.ui.theme.Palette
+import ca.saskevents.app.ui.theme.ThemeMode
 import ca.saskevents.app.util.openUrl
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.combine
@@ -87,6 +88,7 @@ class SettingsViewModel(private val c: AppContainer, private val appContext: and
         c.prefs.saveDefaultFilters(ca.saskevents.app.domain.FilterState(categories = next))
     }
     fun setView(v: String) = io { c.prefs.setDefaultView(v) }
+    fun setTheme(v: String) = io { c.prefs.setThemeMode(v) }
     fun setSync(hours: Int, wifiOnly: Boolean) = io {
         c.prefs.setSyncHours(hours); c.prefs.setWifiOnly(wifiOnly)
         SyncWorker.schedule(appContext, hours, wifiOnly)
@@ -140,6 +142,13 @@ fun SettingsScreen(onSources: () -> Unit) {
         Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
             Chip("Weekly agenda", s.defaultView == "agenda") { vm.setView("agenda") }
             Chip("Calendar", s.defaultView == "calendar") { vm.setView("calendar") }
+        }
+
+        SectionLabel("Appearance")
+        Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+            Chip("Match system", s.themeMode == ThemeMode.SYSTEM, Modifier.testTag("theme-system")) { vm.setTheme(ThemeMode.SYSTEM) }
+            Chip("Light", s.themeMode == ThemeMode.LIGHT, Modifier.testTag("theme-light")) { vm.setTheme(ThemeMode.LIGHT) }
+            Chip("Dark", s.themeMode == ThemeMode.DARK, Modifier.testTag("theme-dark")) { vm.setTheme(ThemeMode.DARK) }
         }
 
         SectionLabel("Updates")
@@ -202,8 +211,8 @@ private fun Toggle(title: String, sub: String, checked: Boolean, onChange: (Bool
 }
 
 @Composable
-private fun Chip(label: String, selected: Boolean, onClick: () -> Unit) {
-    FilterChip(selected = selected, onClick = onClick, label = { Text(label) },
+private fun Chip(label: String, selected: Boolean, modifier: Modifier = Modifier, onClick: () -> Unit) {
+    FilterChip(selected = selected, onClick = onClick, label = { Text(label) }, modifier = modifier,
         colors = FilterChipDefaults.filterChipColors(selectedContainerColor = Palette.SageMist, selectedLabelColor = Palette.SageDeep))
 }
 

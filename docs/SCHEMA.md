@@ -48,7 +48,7 @@ instagram, type (music_venue|bar|bar_restaurant|bar_campus|brewery|nightclub|the
 hostsLiveMusic, indoor, typicalAge, notes, status (open|closed|unknown), verified, provisional, verificationNotes, evidence[], lastVerified`
 
 ### Artist
-`id, name, identity (verified|venue_linked|aggregator_linked|unverified), disambiguation, description, genres[],
+`id, name, identity (verified|venue_linked|matched|aggregator_linked|unverified), musicbrainz?, disambiguation, description, genres[],
 hometown, members[], links[{type,url,provenance}], evidence[], eventCount`
 
 ### SourceStatus (Source Manager)

@@ -67,6 +67,22 @@ class AppFlowTest {
             shot("05_sources")
         }
 
+        // Dark mode: switch in Settings, check the main screens render, then restore the default.
+        ActivityScenario.launch(MainActivity::class.java).use {
+            compose.waitUntil(15_000) { compose.onAllNodes(hasTestTag("agenda")).fetchSemanticsNodes().isNotEmpty() }
+            compose.onNodeWithTag("tab-settings").performClick()
+            compose.onNodeWithTag("theme-dark").performScrollTo().performClick()
+            compose.waitUntil(5_000) { runBlocking { app.container.prefs.settings.first().themeMode } == "dark" }
+            compose.onNodeWithTag("theme-dark").performScrollTo()
+            shot("08_dark_settings")
+            compose.onNodeWithTag("tab-discover").performClick()
+            compose.waitUntil(10_000) { compose.onAllNodes(hasTestTag("agenda")).fetchSemanticsNodes().isNotEmpty() }
+            shot("09_dark_discover")
+            compose.onNodeWithTag("tab-calendar").performClick()
+            compose.waitUntil(5_000) { compose.onAllNodes(hasTestTag("monthLabel")).fetchSemanticsNodes().isNotEmpty() }
+            shot("10_dark_calendar")
+        }
+
         // Bookmark a well-documented event and open its detail screen via the notification deep link.
         val pick = upcoming.filter { it.event.status == "scheduled" }
             .maxByOrNull { it.event.highlightScore * 10 + it.performers.size + (if (it.event.description != null) 5 else 0) }!!
@@ -91,5 +107,6 @@ class AppFlowTest {
         val r2 = runBlocking { offline.repository.sync(force = true) }
         assertTrue(!r2.ok)
         assertTrue(runBlocking { offline.repository.upcoming().first() }.isNotEmpty())
+        runBlocking { app.container.prefs.setThemeMode("system") }
     }
 }

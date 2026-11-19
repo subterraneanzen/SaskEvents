@@ -10,6 +10,7 @@ from urllib.parse import urlparse, urlunparse, parse_qsl, urlencode
 
 from bs4 import BeautifulSoup
 
+from ..artist_links import attach_listing_links
 from ..models import Performer, RawEvent
 from ..normalize import detect_status, html_to_text, parse_age, parse_price, performers_from_title, unescape_all
 
@@ -159,6 +160,8 @@ def _to_raw(ev: dict, source: dict, page_url: str) -> Optional[RawEvent]:
             except (TypeError, ValueError):
                 pass
         ticket = ticket or _strip_tracking(o.get("url"))
+    if ev.get("description"):
+        attach_listing_links(perfs, ev["description"], exclude_domains=[urlparse(url).netloc])
     desc = html_to_text(ev.get("description")) if ev.get("description") else None
     # Songkick/Bandsintown descriptions are boilerplate ("X at Y at <date>"); drop them.
     if desc and (re.match(rf"^{re.escape(title[:20])}.* at .*\d{{4}}-\d{{2}}-\d{{2}}", desc) or desc.strip() == title):

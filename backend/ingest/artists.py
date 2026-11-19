@@ -4,6 +4,8 @@ Identity levels:
   verified          - matches a curated record in config/artists.json on name AND at least one independent
                       corroborating detail (same platform profile, same official link domain, or a listed venue/city hint).
   venue_linked      - links come from the official venue listing, placed next to this performer's name.
+  matched           - details in the listing (the act's stated hometown) matched exactly one MusicBrainz artist of
+                      that exact name; that artist's own links are shown (set in enrich.py).
   aggregator_linked - identified by a platform profile (Songkick/Bandsintown/Ticketmaster) that the platform
                       attached to this specific event. Only that profile page is linked.
   unverified        - name only. No external links are attached.
@@ -14,6 +16,7 @@ import re
 from typing import Optional
 from urllib.parse import urlparse
 
+from .artist_links import handle_matches, handle_of
 from .models import Performer
 from .normalize import norm_name, slugify, unescape_all
 
@@ -75,7 +78,7 @@ class ArtistBook:
         return None
 
     def resolve(self, p: Performer, *, event_id: str, venue_id: Optional[str], municipality: Optional[str],
-                source_name: str, source_tier: int) -> str:
+                source_name: str, source_tier: int, places: Optional[list[str]] = None) -> str:
         p.name = unescape_all(p.name).strip()
         cur = self._curated_match(p, venue_id, municipality)
         if cur:
@@ -93,7 +96,9 @@ class ArtistBook:
                     rec["evidence"].append(e)
             return aid
         pid = _profile_id(p.profile_url)
-        listed = [l for l in p.listed_links if source_tier <= 2]
+        # Official venue/artist listings are trusted for links placed next to a name. From other listings only
+        # links whose account name spells the act's name are kept.
+        listed = [l for l in p.listed_links if source_tier <= 2 or handle_matches(handle_of(l), p.name)]
         if pid:
             aid = f"a-{slugify(p.name)}-{pid}"
             identity = "aggregator_linked"
@@ -112,7 +117,7 @@ class ArtistBook:
             }
         if listed and rec["identity"] in ("unverified", "aggregator_linked"):
             rec["identity"] = "venue_linked" if rec["identity"] == "unverified" else rec["identity"]
-        rank = {"verified": 0, "venue_linked": 1, "aggregator_linked": 2, "unverified": 3}
+        rank = {"verified": 0, "venue_linked": 1, "matched": 2, "aggregator_linked": 3, "unverified": 4}
         if pid and listed and rank[rec["identity"]] > rank["venue_linked"]:
             rec["identity"] = "venue_linked"
         for u in listed:
@@ -124,6 +129,10 @@ class ArtistBook:
         for g in p.genres:
             if g and g not in rec["genres"]:
                 rec["genres"].append(g)
+        for pl in places or []:
+            hints = rec.setdefault("_places", [])
+            if pl not in hints:
+                hints.append(pl)
         ev_txt = {"aggregator_linked": f"{p.profile_platform} profile attached to a listing",
                   "venue_linked": f"links supplied by {source_name}",
                   "unverified": "name taken from an event listing only"}.get(identity)
