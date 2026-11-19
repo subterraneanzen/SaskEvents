@@ -77,7 +77,7 @@ class AppFlowTest {
             compose.onNodeWithTag("verification").assertExists()
             shot("03_event_detail")
             compose.onNodeWithTag("tab-saved").performClick()
-            compose.onAllNodesWithText(pick.event.title, substring = true).onFirst().assertExists()
+            compose.waitUntil(10_000) { compose.onAllNodesWithText(pick.event.title, substring = true).fetchSemanticsNodes().isNotEmpty() }
             shot("06_saved")
         }
 
