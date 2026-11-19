@@ -177,3 +177,16 @@ def test_full_run(tmp_path):
     b3 = run(CONFIG, tmp_path / "out2", tmp_path / "out3", force=True, fetcher=f, geocode=False, now=now.replace(day=20))
     k = [e for e in b3["events"] if e["title"] == "Karaoke"][0]
     assert k["status"] == "unlisted" and "No longer listed" in k["statusNote"]
+
+
+def test_regrouped_event_is_superseded_not_unlisted(tmp_path):
+    now = datetime(2026, 11, 18, 18, 0, tzinfo=timezone.utc)
+    b = run(CONFIG, tmp_path / "p", tmp_path / "o1", force=True, fetcher=FixtureFetcher(), geocode=False, now=now)
+    # Simulate an old id that no longer matches any cluster but whose source listing still exists.
+    bundle_path = tmp_path / "o1" / "saskatoon" / "bundle.json"
+    data = json.loads(bundle_path.read_text())
+    ghost = dict(data["events"][0]); ghost["id"] = "e-ghost"
+    data["events"].append(ghost)
+    bundle_path.write_text(json.dumps(data))
+    b2 = run(CONFIG, tmp_path / "o1", tmp_path / "o2", force=True, fetcher=FixtureFetcher(), geocode=False, now=now)
+    assert "e-ghost" not in {e["id"] for e in b2["events"]}

@@ -98,7 +98,7 @@ class Builder:
         self.prev_key_to_id = {}
         for e in self.prev_events.values():
             for k in e.get("sourceKeys", []):
-                self.prev_key_to_id[k] = e["id"]
+                self.prev_key_to_id.setdefault(k, e["id"])
         self.now = now or datetime.now(timezone.utc)
         self.today = self.now.astimezone(TZ).date()
 
@@ -119,7 +119,8 @@ class Builder:
                 ev["id"] += "-" + hashlib.sha1(ev["sourceKeys"][0].encode()).hexdigest()[:4]
             used_ids.add(ev["id"])
             events.append(ev)
-        events = self._continuity(events, healthy_sources)
+        current_keys = {k for e in events for k in e["sourceKeys"]}
+        events = self._continuity(events, healthy_sources, current_keys)
         # Window: keep today (local) onward, up to 400 days ahead.
         horizon = self.today + timedelta(days=400)
         events = [e for e in events if date.fromisoformat(e["endDate"] or e["startDate"]) >= self.today
@@ -296,7 +297,7 @@ class Builder:
             "sourceKeys": source_keys,
         }
 
-    def _continuity(self, events: list[dict], healthy: set[str]) -> list[dict]:
+    def _continuity(self, events: list[dict], healthy: set[str], current_keys: set[str]) -> list[dict]:
         now_iso = self.now.replace(microsecond=0).isoformat()
         seen = set()
         for e in events:
@@ -313,6 +314,8 @@ class Builder:
         for pid, p in self.prev_events.items():
             if pid in seen:
                 continue
+            if set(p.get("sourceKeys", [])) & current_keys:
+                continue  # its listing is still there, now consolidated into another event: superseded, not missing
             end = date.fromisoformat(p.get("endDate") or p["startDate"])
             if end < self.today:
                 continue  # expired: archived by omission (app keeps bookmarked copies)

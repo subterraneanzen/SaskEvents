@@ -68,8 +68,15 @@ private fun fmtMoney(d: Double) = if (d % 1.0 == 0.0) d.toLong().toString() else
 
 fun minutesToTime(m: Int?): LocalTime? = m?.let { LocalTime.of((it / 60) % 24, it % 60) }
 
-private val TIME_FMT = DateTimeFormatter.ofPattern("h:mm a", Locale.CANADA)
-fun timeLabel(m: Int?): String = minutesToTime(m)?.format(TIME_FMT)?.replace(":00", "")?.lowercase(Locale.CANADA)?.replace(" ", "") ?: "Time TBA"
+/** "8pm", "10:15pm", "12:30am". Built by hand so it never depends on the device locale's am/pm text. */
+fun timeLabel(m: Int?): String {
+    if (m == null) return "Time TBA"
+    val h24 = (m / 60) % 24
+    val min = m % 60
+    val h12 = if (h24 % 12 == 0) 12 else h24 % 12
+    val suffix = if (h24 < 12) "am" else "pm"
+    return if (min == 0) "$h12$suffix" else "$h12:${min.toString().padStart(2, '0')}$suffix"
+}
 
 fun parseMinutes(hhmm: String?): Int? = hhmm?.let {
     val p = it.split(":")
