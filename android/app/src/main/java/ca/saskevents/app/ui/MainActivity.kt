@@ -90,13 +90,14 @@ fun AppRoot(pendingEvent: MutableStateFlow<String?>) {
         start = if (app.container.prefs.settings.first().defaultView == "calendar") "calendar" else "discover"
     }
     val pending by pendingEvent.collectAsState()
-    LaunchedEffect(pending, start) {
-        val id = pending
-        if (id != null && start != null) { nav.navigate("event/$id"); pendingEvent.value = null }
-    }
     val startRoute = start ?: return
     val backStack by nav.currentBackStackEntryAsState()
     val current = backStack?.destination?.route
+    // Deep link from a notification: only navigate once the NavHost has set its graph (first back-stack entry exists).
+    LaunchedEffect(pending, backStack != null) {
+        val id = pending
+        if (id != null && backStack != null) { nav.navigate("event/$id"); pendingEvent.value = null }
+    }
     Scaffold(
         containerColor = Palette.Paper,
         bottomBar = {
