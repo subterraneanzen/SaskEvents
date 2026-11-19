@@ -43,3 +43,18 @@ The app's **Settings → Data sources** screen shows the same information.
 2. If the site has schema.org JSON-LD or an iCal feed, the existing `jsonld` / `ics` adapters work as is.
 3. Otherwise add a small adapter in `backend/ingest/adapters/` and a fixture-based test.
 4. Push to `main`: the ingest workflow runs immediately and the report shows how many events it found.
+
+## Artist listening links (MusicBrainz)
+
+Each act gets **Listen & preview** buttons in the app (YouTube, Bandcamp, Spotify, Facebook).
+
+* **Filled button:** opens the act's own page. These links come from a curated record, from the venue listing,
+  or from **MusicBrainz**. MusicBrainz is used only when its database already links the exact Songkick or
+  Bandsintown profile that the event listing attached to one artist; that artist's Bandcamp, YouTube,
+  Facebook, Spotify, SoundCloud and website relations are then added with provenance. Matching is never by name.
+* **Outlined button:** a search on that site for the act's name, labelled as a search in the app.
+
+Lookups are cached in `feed/cache/musicbrainz.json` (30 days when found, 10 days when not), stay within the
+MusicBrainz limit of 1 request per second, and use at most 120 lookups per run. Turn off with `--no-enrich`.
+Local acts that MusicBrainz doesn't know can be added by hand to `backend/config/artists.json` with their
+Bandcamp/YouTube/Facebook links.

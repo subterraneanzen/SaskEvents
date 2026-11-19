@@ -190,3 +190,56 @@ def test_regrouped_event_is_superseded_not_unlisted(tmp_path):
     bundle_path.write_text(json.dumps(data))
     b2 = run(CONFIG, tmp_path / "o1", tmp_path / "o2", force=True, fetcher=FixtureFetcher(), geocode=False, now=now)
     assert "e-ghost" not in {e["id"] for e in b2["events"]}
+
+
+def test_unescape_and_title_split():
+    from ingest.normalize import unescape_all
+    assert unescape_all("80s &amp;amp; 90s") == "80s & 90s"
+    got = performers_from_title("Acoustic Sessions Christmas : Munro &amp; Patrick, Jay Semko, &amp; Chris Henderson")
+    assert "Chris Henderson" in got and "Jay Semko" in got and not any("&amp;" in g for g in got)
+    assert performers_from_title("80s &amp;amp; 90s Over 30s Daytime Clubbing - SASKATOON") == []
+
+
+def test_musicbrainz_enrichment(tmp_path):
+    from datetime import datetime, timezone
+    from ingest.enrich import enrich_artists
+
+    class MBFetcher:
+        calls = 0
+
+        def get(self, url, params=None, headers=None, check_robots=True):
+            MBFetcher.calls += 1
+
+            class R:
+                pass
+            r = R()
+            if url.endswith("/url"):
+                if params["resource"] == "https://www.songkick.com/artists/111":
+                    r.json = lambda: {"relations": [{"artist": {"id": "mb-1", "name": "Band One"}}]}
+                    return r
+                raise RuntimeError("HTTP 404 for x")
+            r.json = lambda: {"relations": [
+                {"type": "bandcamp", "url": {"resource": "https://bandone.bandcamp.com/"}},
+                {"type": "youtube", "url": {"resource": "https://www.youtube.com/channel/UC123"}},
+                {"type": "social network", "url": {"resource": "https://www.facebook.com/bandone"}},
+                {"type": "discogs", "url": {"resource": "https://www.discogs.com/artist/1"}},
+                {"type": "social network", "ended": True, "url": {"resource": "https://www.instagram.com/old"}},
+            ]}
+            return r
+
+    arts = [
+        {"id": "a1", "name": "Band One", "links": [{"type": "songkick", "url": "https://www.songkick.com/artists/111-band-one"}], "evidence": []},
+        {"id": "a2", "name": "Band Two", "links": [{"type": "songkick", "url": "https://www.songkick.com/artists/222-band-two"}], "evidence": []},
+        {"id": "a3", "name": "Band One", "links": [], "evidence": []},  # same name, no profile: never enriched
+    ]
+    now = datetime(2026, 11, 19, tzinfo=timezone.utc)
+    st = enrich_artists(arts, MBFetcher(), tmp_path / "c" / "mb.json", tmp_path / "prev.json", now=now)
+    types = [l["type"] for l in arts[0]["links"]]
+    assert types == ["songkick", "bandcamp", "youtube", "facebook"]
+    assert all("MusicBrainz" in l["provenance"] for l in arts[0]["links"][1:])
+    assert len(arts[1]["links"]) == 1 and arts[2]["links"] == []
+    assert st["enriched"] == 1 and st["errors"] == 0
+    # Second run uses the cache (including the negative result) and adds no duplicates.
+    calls = MBFetcher.calls
+    enrich_artists(arts, MBFetcher(), tmp_path / "c" / "mb.json", tmp_path / "c" / "mb.json", now=now)
+    assert MBFetcher.calls == calls and len(arts[0]["links"]) == 4

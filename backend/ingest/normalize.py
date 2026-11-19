@@ -146,15 +146,28 @@ def detect_status(*texts: Optional[str]) -> str:
 # ---------- performers from titles ----------
 _SPLIT = re.compile(r"\s+(?:w/|with|ft\.?|feat\.?|featuring|and guests?|\+)\s+|\s*,\s*|\s+/\s+|\s+\|\s+", re.I)
 _NON_PERFORMER = re.compile(
-    r"\b(trivia|bingo|karaoke|night|party|festival|fest|presents?|tour|show|release|open mic|jam|"
+    r"\b(trivia|bingo|karaoke|night|party|clubbing|day party|over 30|festival|fest|presents?|tour|show|release|open mic|jam|"
     r"comedy|tickets?|tba|guests?|special|edition|live at|xmas|christmas|new year|art nite|dj night|"
     r"close out|celebration|brunch|market|workshop|sold out|winterruption|cancell?ed|postponed|\d+\s*[ap]m)\b",
     re.I,
 )
 
 
+def unescape_all(s: str | None) -> str | None:
+    """Undo HTML entities, including double-escaped ones like '&amp;amp;' that some listings publish."""
+    if s is None:
+        return None
+    for _ in range(3):
+        u = html.unescape(s)
+        if u == s:
+            break
+        s = u
+    return s.replace("\xa0", " ")
+
+
 def performers_from_title(title: str) -> list[str]:
     """Conservative split of 'A w/ B, C & D' style titles. '&' / 'and' are kept (band names use them)."""
+    title = unescape_all(title)
     t = re.sub(r"\s*[-–|]\s*(saskatoon|sk|live in saskatoon|live at the capitol)\b.*$", "", title, flags=re.I)
     t = re.sub(r"^[^:]{0,60}:\s*", lambda m: "" if re.search(r"winterruption|presents?|20\d\d", m.group(0), re.I) else m.group(0), t)
     t = re.sub(r"\s+-\s+live at .*$", "", t, flags=re.I)

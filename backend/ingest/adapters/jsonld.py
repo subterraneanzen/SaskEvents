@@ -11,7 +11,7 @@ from urllib.parse import urlparse, urlunparse, parse_qsl, urlencode
 from bs4 import BeautifulSoup
 
 from ..models import Performer, RawEvent
-from ..normalize import detect_status, html_to_text, parse_age, parse_price, performers_from_title
+from ..normalize import detect_status, html_to_text, parse_age, parse_price, performers_from_title, unescape_all
 
 log = logging.getLogger(__name__)
 
@@ -102,7 +102,7 @@ def parse_html(html: str, source: dict, page_url: str) -> list[RawEvent]:
 
 
 def _to_raw(ev: dict, source: dict, page_url: str) -> Optional[RawEvent]:
-    name = (ev.get("name") or "").strip()
+    name = (unescape_all(ev.get("name")) or "").strip()
     sd, st = _parse_dt(ev.get("startDate"))
     if not name or not sd:
         return None
@@ -120,7 +120,7 @@ def _to_raw(ev: dict, source: dict, page_url: str) -> Optional[RawEvent]:
         lon = float(geo.get("longitude")) if geo.get("longitude") not in (None, "") else None
     except (TypeError, ValueError):
         pass
-    venue_name = (loc.get("name") or "").strip() or None
+    venue_name = (unescape_all(loc.get("name")) or "").strip() or None
     # AllEvents puts the address into the place name: "Capitol Music Club, 244 1st Ave N, Saskatoon, Saskatchewan"
     if venue_name and "," in venue_name and re.search(r"\d", venue_name.split(",", 1)[1]):
         venue_name = venue_name.split(",", 1)[0].strip()
@@ -141,7 +141,7 @@ def _to_raw(ev: dict, source: dict, page_url: str) -> Optional[RawEvent]:
         if not prof and plat == "bandsintown" and isinstance(organizer, dict) and organizer.get("name") == p.get("name"):
             prof = _strip_tracking(organizer.get("url"))
         g = p.get("genre") or []
-        perfs.append(Performer(name=p["name"].strip(), profile_url=prof, profile_platform=_platform(prof),
+        perfs.append(Performer(name=unescape_all(p["name"]).strip(), profile_url=prof, profile_platform=_platform(prof),
                                genres=g if isinstance(g, list) else [g]))
     if not perfs:
         perfs = [Performer(name=n) for n in performers_from_title(title)]

@@ -20,6 +20,7 @@ from pathlib import Path
 
 from .adapters import ADAPTERS
 from .adapters.ticketmaster import MissingApiKey
+from .enrich import enrich_artists
 from .http import Fetcher, RobotsDisallowed
 from .pipeline import Builder, raw_from_json, raw_to_json
 from .venues import VenueRegistry
@@ -40,7 +41,8 @@ def _iso(dt: datetime) -> str:
 
 
 def run(config_dir: Path, prev_dir: Path, out_dir: Path, *, force: bool = False, fetcher=None,
-        only: set[str] | None = None, geocode: bool = True, now: datetime | None = None) -> dict:
+        only: set[str] | None = None, geocode: bool = True, enrich: bool = True,
+        now: datetime | None = None) -> dict:
     now = now or datetime.now(timezone.utc)
     venues_cfg = _load(config_dir / "venues.json")
     sources_cfg = _load(config_dir / "sources.json")["sources"]
@@ -125,6 +127,10 @@ def run(config_dir: Path, prev_dir: Path, out_dir: Path, *, force: bool = False,
     for a in artists:
         a["eventCount"] = sum(1 for e in events if a["id"] in e.get("performerIds", []))
     artists = [a for a in artists if a["eventCount"] > 0]
+    if enrich:
+        st_enrich = enrich_artists(artists, fetcher, out_dir / "cache" / "musicbrainz.json",
+                                   prev_dir / "cache" / "musicbrainz.json", now=now)
+        log.info("artist links from MusicBrainz: %s", st_enrich)
     for s in states:
         s["eventsInFeed"] = sum(1 for e in events if any(x["sourceId"] == s["id"] for x in e["sources"]))
 
@@ -178,10 +184,11 @@ def main(argv=None):
     ap.add_argument("--force", action="store_true", help="ignore per-source frequency")
     ap.add_argument("--only", default="", help="comma-separated source ids")
     ap.add_argument("--no-geocode", action="store_true")
+    ap.add_argument("--no-enrich", action="store_true", help="skip MusicBrainz artist links")
     a = ap.parse_args(argv)
     logging.basicConfig(level=logging.INFO, format="%(levelname)s %(name)s: %(message)s")
     b = run(Path(a.config), Path(a.prev), Path(a.out), force=a.force,
-            only=set(filter(None, a.only.split(","))) or None, geocode=not a.no_geocode)
+            only=set(filter(None, a.only.split(","))) or None, geocode=not a.no_geocode, enrich=not a.no_enrich)
     print(report(b))
     ok = sum(1 for s in b["sources"] if s.get("status") == "ok")
     # Fail the job only when every enabled source failed (feed would be stale).

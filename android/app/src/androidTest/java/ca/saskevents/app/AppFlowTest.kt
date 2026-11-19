@@ -76,6 +76,11 @@ class AppFlowTest {
             compose.waitUntil(10_000) { compose.onAllNodes(hasTestTag("eventDetail")).fetchSemanticsNodes().isNotEmpty() }
             compose.onNodeWithTag("verification").assertExists()
             shot("03_event_detail")
+            pick.performers.firstOrNull()?.let { p ->
+                compose.onNodeWithTag("listen-${p.name}").performScrollTo().assertExists()
+                compose.onAllNodesWithText("YouTube").fetchSemanticsNodes().isNotEmpty().let(::assertTrue)
+                shot("07_listen_links")
+            }
             compose.onNodeWithTag("tab-saved").performClick()
             compose.waitUntil(10_000) { compose.onAllNodesWithText(pick.event.title, substring = true).fetchSemanticsNodes().isNotEmpty() }
             shot("06_saved")

@@ -15,7 +15,7 @@ from typing import Optional
 from urllib.parse import urlparse
 
 from .models import Performer
-from .normalize import norm_name, slugify
+from .normalize import norm_name, slugify, unescape_all
 
 LINK_TYPES = [
     ("bandcamp", r"bandcamp\.com"), ("youtube", r"youtube\.com|youtu\.be"), ("facebook", r"facebook\.com|fb\.com"),
@@ -76,6 +76,7 @@ class ArtistBook:
 
     def resolve(self, p: Performer, *, event_id: str, venue_id: Optional[str], municipality: Optional[str],
                 source_name: str, source_tier: int) -> str:
+        p.name = unescape_all(p.name).strip()
         cur = self._curated_match(p, venue_id, municipality)
         if cur:
             aid = cur["id"]

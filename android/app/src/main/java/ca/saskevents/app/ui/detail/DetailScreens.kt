@@ -76,6 +76,8 @@ import ca.saskevents.app.ui.theme.Palette
 import ca.saskevents.app.util.addToCalendar
 import ca.saskevents.app.util.openMap
 import ca.saskevents.app.util.openUrl
+import ca.saskevents.app.ui.components.ListenLegend
+import ca.saskevents.app.ui.components.ListenLinks
 import ca.saskevents.app.util.share
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
@@ -178,8 +180,12 @@ fun EventDetailScreen(id: String, onBack: () -> Unit, onVenue: (String) -> Unit,
                 }
 
                 if (it.performers.isNotEmpty()) {
-                    SectionLabel("Performers")
-                    it.performers.forEach { a -> ArtistLine(a) { onArtist(a.id) } }
+                    SectionLabel("Performers · listen & preview")
+                    it.performers.forEach { a ->
+                        ArtistLine(a) { onArtist(a.id) }
+                        ListenLinks(a.name, a.links, Modifier.padding(bottom = 10.dp))
+                    }
+                    ListenLegend(it.performers.any { a -> a.links.any { l -> l.type in setOf("youtube", "bandcamp", "spotify", "facebook") } })
                 }
 
                 if (e.links.isNotEmpty()) {
@@ -321,15 +327,18 @@ fun ArtistScreen(id: String, onBack: () -> Unit, onOpenEvent: (String) -> Unit) 
             if (artist.genres.isNotEmpty()) Fact("Genre", artist.genres.joinToString(", "))
             if (artist.members.isNotEmpty()) Fact("Members", artist.members.joinToString(", "))
             artist.description?.let { Text(it, style = MaterialTheme.typography.bodyMedium, modifier = Modifier.padding(top = 10.dp)) }
+            SectionLabel("Listen & preview")
+            ListenLinks(artist.name, artist.links)
+            ListenLegend(artist.links.any { l -> l.type in setOf("youtube", "bandcamp", "spotify", "facebook") })
             if (artist.links.isNotEmpty()) {
-                SectionLabel("Links")
+                SectionLabel("Known pages")
                 artist.links.forEach { l ->
                     LinkLine(l.type.replace('_', ' ').replaceFirstChar { it.uppercase() } + " · " + host(l.url), l.url)
                     l.provenance?.let { p -> Text("Source: $p", style = MaterialTheme.typography.labelSmall, color = Palette.InkSoft) }
                 }
             } else {
-                SectionLabel("Links")
-                Text("No links are shown because this act could not be confidently identified.", style = MaterialTheme.typography.bodySmall, color = Palette.InkSoft)
+                SectionLabel("Known pages")
+                Text("No pages are confirmed for this act yet, so the buttons above search by name.", style = MaterialTheme.typography.bodySmall, color = Palette.InkSoft)
             }
             if (artist.evidence.isNotEmpty()) {
                 SectionLabel("How this was identified")
