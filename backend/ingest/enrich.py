@@ -284,21 +284,24 @@ def enrich_from_listings(artists: list[dict], fetcher, cache_path: Path, prev_ca
             if hit and hit.get("mbid"):
                 stats["hometown_matches"] += 1
                 where = hit.get("area") or places[0]
+                area_l = (hit.get("area") or "").lower()
+                said = next((p for p in places if area_l in place_keys(p)), None) or \
+                    next((p for p in places if is_clear_place(p)), places[0])
                 prov = f"MusicBrainz artist '{hit.get('name') or name}' from {where}, matching the listing"
                 added = sum(_add_link(a, u, prov) for u in hit.get("links", []))
                 stats["links_added"] += added
                 a["musicbrainz"] = f"https://musicbrainz.org/artist/{hit['mbid']}"
                 if a.get("identity") in ("unverified", "aggregator_linked"):
                     a["identity"] = "matched"
-                ev = (f"listing says the act is from {places[0]}; exactly one MusicBrainz artist with this name is from "
+                ev = (f"listing says the act is from {said}; exactly one MusicBrainz artist with this name is from "
                       f"{where}" if hit.get("how") == "place" else
-                      f"listing says the act is from {places[0]}; the only MusicBrainz artist with this name is from {where}")
+                      f"listing says the act is from {said}; the only MusicBrainz artist with this name is from {where}")
                 if ev not in a["evidence"]:
                     a["evidence"].append(ev)
                 if not a.get("disambiguation") and hit.get("disambiguation"):
                     a["disambiguation"] = hit["disambiguation"]
                 if not a.get("hometown") and hit.get("how") == "place":
-                    a["hometown"] = next((p for p in places if is_clear_place(p)), where)
+                    a["hometown"] = said if is_clear_place(said) else where
         if places and not a.get("hometown"):
             clear = [p for p in places if is_clear_place(p)]
             if len(clear) == 1:
