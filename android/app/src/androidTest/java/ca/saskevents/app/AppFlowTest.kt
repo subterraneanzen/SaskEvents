@@ -6,7 +6,10 @@ import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.junit4.createEmptyComposeRule
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
+import androidx.compose.ui.test.onAllNodesWithText
+import androidx.compose.ui.test.onFirst
 import androidx.compose.ui.test.performClick
+import androidx.compose.ui.test.performScrollTo
 import androidx.test.core.app.ActivityScenario
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
@@ -57,9 +60,10 @@ class AppFlowTest {
             shot("02_calendar")
 
             compose.onNodeWithTag("tab-settings").performClick()
-            compose.onNodeWithText("Settings").assertExists()
+            compose.onNodeWithTag("radius").assertExists()
             shot("04_settings")
-            compose.onNodeWithText("Data sources", substring = true).performClick()
+            compose.onNodeWithText("Data sources (", substring = true).performScrollTo().performClick()
+            compose.waitForIdle()
             shot("05_sources")
         }
 
@@ -73,7 +77,7 @@ class AppFlowTest {
             compose.onNodeWithTag("verification").assertExists()
             shot("03_event_detail")
             compose.onNodeWithTag("tab-saved").performClick()
-            compose.onNodeWithText(pick.event.title, substring = true).assertExists()
+            compose.onAllNodesWithText(pick.event.title, substring = true).onFirst().assertExists()
             shot("06_saved")
         }
 
