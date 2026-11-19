@@ -175,7 +175,7 @@ fun DiscoverScreen(onOpenEvent: (String) -> Unit, jumpTo: LocalDate? = null, onJ
                 item(key = "hl") { Highlights(s.highlights, onOpenEvent) }
             }
             s.days.forEach { (day, dayItems) ->
-                if (dayItems.isEmpty() && s.isWeek && s.filters.isEmpty) {
+                if (dayItems.isEmpty() && s.isWeek && s.filters.isEmpty && !day.isBefore(today())) {
                     stickyHeader(key = "h$day") { DayHeader(day.format(DAY_FMT), "Nothing listed", highlight = day == today()) }
                 } else if (dayItems.isNotEmpty()) {
                     stickyHeader(key = "h$day") {

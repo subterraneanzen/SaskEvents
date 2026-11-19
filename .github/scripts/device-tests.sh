@@ -8,6 +8,9 @@ APP=ca.saskevents.app
 
 adb wait-for-device
 adb shell settings put global window_animation_scale 0
+# The emulator's own launcher sometimes ANRs on slow CI machines; keep its dialog out of the screenshots.
+adb shell settings put global hide_error_dialogs 1
+adb shell am broadcast -a android.intent.action.CLOSE_SYSTEM_DIALOGS >/dev/null 2>&1 || true
 adb install -r app/build/outputs/apk/debug/app-debug.apk
 adb install -r app/build/outputs/apk/androidTest/debug/app-debug-androidTest.apk
 
@@ -26,6 +29,7 @@ adb install app/build/outputs/apk/release/app-release.apk
 adb logcat -c
 adb shell am start -W -n "$APP/.ui.MainActivity"
 sleep 25
+adb shell am broadcast -a android.intent.action.CLOSE_SYSTEM_DIALOGS >/dev/null 2>&1 || true
 adb exec-out screencap -p > "$OUT/screenshots/00_release_first_launch.png"
 if adb shell pidof "$APP" >/dev/null; then echo "release app running" | tee -a "$OUT/instrumentation.txt"; else echo "RELEASE APP NOT RUNNING" | tee -a "$OUT/instrumentation.txt"; STATUS=1; fi
 adb logcat -d -t 1500 > "$OUT/logcat-release.txt" || true

@@ -132,9 +132,9 @@ fun EventRow(item: EventItem, homeCity: String, onClick: () -> Unit, onBookmark:
                     e.isFree == true -> Pill("Free", bg = Palette.ClayMist, fg = Palette.Clay)
                     e.priceMin != null -> Pill("$" + (if (e.priceMin % 1.0 == 0.0) e.priceMin.toLong().toString() else "%.2f".format(e.priceMin)) + if (e.priceMax != null && e.priceMax != e.priceMin) "+" else "")
                     e.priceText != null -> Pill(e.priceText.take(22))
-                    else -> Pill("Price n/s")
+                    else -> Unit // unknown price: shown as "Not specified" on the detail screen
                 }
-                Pill(if (e.ageRestriction == null) "Age n/s" else ageLabel(e.ageRestriction))
+                if (e.ageRestriction != null) Pill(ageLabel(e.ageRestriction))
                 e.tags.filter { it in setOf("dj", "open_mic", "jam", "karaoke", "trivia", "festival", "drag", "tribute") }.take(2)
                     .forEach { Pill(ca.saskevents.app.domain.tagLabel(it)) }
             }
