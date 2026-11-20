@@ -1,0 +1,18 @@
+{
+ "schemaVersion": 1,
+ "generatedAt": "2026-11-20T19:23:02+00:00",
+ "cities": [
+  {
+   "id": "saskatoon",
+   "name": "Saskatoon",
+   "province": "SK",
+   "country": "CA",
+   "timezone": "America/Regina",
+   "lat": 52.1333,
+   "lon": -106.6833,
+   "coordSource": "Wikipedia city coordinates 52\u00b008\u2032N 106\u00b041\u2032W",
+   "bundle": "saskatoon/bundle.json",
+   "eventCount": 142
+  }
+ ]
+}
