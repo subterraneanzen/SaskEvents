@@ -92,6 +92,18 @@
       "notes": "Saskatoon lifestyle blog (Squarespace). No calendar or feed: events are written up in blog posts, mainly the weekly weekend guide. The adapter reads that post plus the newest posts in the 'saskatoon events' category. Strong on family, market and community events. Tier 4: discovery only, never venue confirmation."
     },
     {
+      "id": "artbar",
+      "name": "Art Bar – Official website",
+      "url": "https://www.artbartheatre.com/",
+      "adapter": "jsonld",
+      "tier": 1,
+      "venueId": "art-bar",
+      "enabled": true,
+      "frequencyHours": 12,
+      "options": {},
+      "notes": "Art Bar's own site (artbartheatre.com), where it sells advance tickets. Uses the generic schema.org Event JSON-LD adapter. The site's markup could not be inspected when this source was added, so whether it embeds event data is unconfirmed: the ingest report shows whether it yields events, and if it yields none a site-specific adapter is needed. Art Bar shows also arrive via Broadway Theatre (festival shows), AllEvents and Songkick and are now attributed to this venue by name."
+    },
+    {
       "id": "bandsintown",
       "name": "Bandsintown – Saskatoon",
       "url": "https://www.bandsintown.com/c/saskatoon-sk",

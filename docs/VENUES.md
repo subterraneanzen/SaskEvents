@@ -31,6 +31,7 @@ This is a **starting inventory, not a complete one**. It covers the venues that 
 | **Fox & Hounds Pub and Brewery** | bar | 7 Assiniboine Dr #20, Saskatoon, SK S7K 1H1 |  | no | 19+ (licensed pub) | open | [1](https://www.kineticist.com/locations/fox-hounds-pub-and-brewery-saskatoon-sk.md) [2](https://www.eventbrite.ca/d/canada--saskatoon/trivia-night) |
 | **Knox United Church** | church hall | _not verified_ |  | yes | All ages | open | [1](https://allevents.in/saskatoon/capitol) [2](https://feverup.com/en/saskatoon/venue/sasktel-theatre-at-remai-modern) |
 | **Prairieland Park** | exhibition grounds | _not verified_ |  | yes | Varies by event | open | [1](https://www.tourismsaskatoon.com/event/boxing-night/24673/?page=1) |
+| **Art Bar** | bar | 229 20th St W, Saskatoon, SK S7M 0W8 | Riversdale | yes | 19+ for most evening shows (stated per event) | open | [1](https://riversdale.ca/listing/art-bar-theatre/) [2](https://www.discoversaskatoon.com/calendar-events/dude-this-one-time-comedy-tour-19) [3](https://www.facebook.com/ArtBarTheatre/) |
 
 ### Verification notes
 
@@ -59,6 +60,7 @@ This is a **starting inventory, not a complete one**. It covers the venues that 
 - **Fox & Hounds Pub and Brewery**: Address from a single secondary listing; needs confirmation.
 - **Knox United Church**: Venue named in AllEvents and Fever listings; street address not yet verified.
 - **Prairieland Park**: Named in Tourism Saskatoon and AllEvents listings; address not yet verified.
+- **Art Bar**: Address, phone and website from the Riversdale business directory and Discover Saskatoon listings (2025-2026). A few listings give postal code S7M 1N4; most give S7M 0W8. The official site's event markup has not been inspected yet.
 
 ## Closed or renamed venues (checked so events are not attributed to them)
 
@@ -69,7 +71,6 @@ This is a **starting inventory, not a complete one**. It covers the venues that 
 
 - 244 1st Ave North – Saskatoon – 244 1st Ave N, Saskatoon, SK S7K 1X1, Canada, Saskatoon, SK
 - 35 22 Street East – Saskatoon – 35 22nd St E, Saskatoon, SK S7K 0C8, Canada, Saskatoon, SK
-- Art Bar – Saskatoon – Saskatoon, SK
 - Dekker Centre for the Performing Arts – North Battleford – 623 Carlton Trail North, North Battleford, SK
 - E.A. Rawlinson Centre for the Arts – Prince Albert – 142 12th St. W., Prince Albert, SK
 - grosvenor park united Church – Saskatoon – 407 Cumberland Ave. S, Saskatoon, SK
@@ -81,4 +82,4 @@ This is a **starting inventory, not a complete one**. It covers the venues that 
 
 ## Known gaps worth adding next
 
-Saskatoon venues mentioned in listings that still need address/website verification before being added: Art Bar (Winterruption venue), Green Room, Broadway Collective (733 Broadway Ave #101), Nightmarket YXE (251 3rd Ave S), Grosvenor Park United Church, Westgate Alliance Church, Finns Pub at the Parktown Hotel, Lucky Bastard Distillers, Crossmount Cider Company, 3 Hall Public House, The Flats Eatery + Drink, Cathedral Social Hall, Stumbletown Distilling / City Limits Brewing, Ukrainian Museum of Canada, Western Development Museum, Remai Modern's SaskTel Theatre, Wanuskewin Heritage Park (outside city limits), Saskatoon Public Library branches, Shakespeare on the Saskatchewan (seasonal outdoor).
+Saskatoon venues mentioned in listings that still need address/website verification before being added: Green Room, Broadway Collective (733 Broadway Ave #101), Nightmarket YXE (251 3rd Ave S), Grosvenor Park United Church, Westgate Alliance Church, Finns Pub at the Parktown Hotel, Lucky Bastard Distillers, Crossmount Cider Company, 3 Hall Public House, The Flats Eatery + Drink, Cathedral Social Hall, Stumbletown Distilling / City Limits Brewing, Ukrainian Museum of Canada, Western Development Museum, Remai Modern's SaskTel Theatre, Wanuskewin Heritage Park (outside city limits), Saskatoon Public Library branches, Shakespeare on the Saskatchewan (seasonal outdoor).

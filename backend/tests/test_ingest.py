@@ -273,3 +273,17 @@ def test_squarespace_blog_weekend_guide():
     assert brunch.start_date == date(2026, 11, 22) and brunch.status == "cancelled" and brunch.venue_name == "Example Cafe"
     assert all(e.performers == [] for e in evs.values())
     assert len({e.source_key for e in evs.values()}) == 5
+
+
+def test_art_bar_listings_resolve_to_art_bar_venue():
+    from ingest.models import RawEvent
+    from ingest.venues import VenueRegistry
+    reg = VenueRegistry(json.loads((CONFIG / "venues.json").read_text()))
+    d = date(2026, 12, 3)
+    names = ["Art Bar", "ART BAR", "Art Bar – Saskatoon", "Art Bar Theatre"]
+    for n in names:
+        assert reg.resolve(RawEvent("x", n, "u", "Show", d, venue_name=n)) == "art-bar", n
+    # Listings that only give the street address (Ticket Tailor, AllEvents)
+    ev = RawEvent("x", "k", "u", "Show", d, venue_name="Back Room", venue_address="229 20th St W, Saskatoon, SK")
+    assert reg.resolve(ev) == "art-bar"
+    assert SRC["artbar"]["venueId"] == "art-bar" and SRC["artbar"]["enabled"]
