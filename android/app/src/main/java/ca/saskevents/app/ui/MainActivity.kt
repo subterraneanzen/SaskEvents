@@ -15,6 +15,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Bookmarks
 import androidx.compose.material.icons.outlined.CalendarMonth
 import androidx.compose.material.icons.outlined.Explore
+import androidx.compose.material.icons.outlined.NewReleases
 import androidx.compose.material.icons.outlined.Settings
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
@@ -47,6 +48,7 @@ import ca.saskevents.app.ui.detail.ArtistScreen
 import ca.saskevents.app.ui.detail.EventDetailScreen
 import ca.saskevents.app.ui.detail.VenueScreen
 import ca.saskevents.app.ui.discover.DiscoverScreen
+import ca.saskevents.app.ui.recent.RecentScreen
 import ca.saskevents.app.ui.saved.SavedScreen
 import ca.saskevents.app.ui.settings.SettingsScreen
 import ca.saskevents.app.ui.settings.SourcesScreen
@@ -95,6 +97,7 @@ private data class Tab(val route: String, val label: String, val icon: ImageVect
 
 private val TABS = listOf(
     Tab("discover", "Discover", Icons.Outlined.Explore),
+    Tab("recent", "New", Icons.Outlined.NewReleases),
     Tab("calendar", "Calendar", Icons.Outlined.CalendarMonth),
     Tab("saved", "Saved", Icons.Outlined.Bookmarks),
     Tab("settings", "Settings", Icons.Outlined.Settings),
@@ -141,8 +144,10 @@ fun AppRoot(pendingEvent: MutableStateFlow<String?>) {
     ) { pad ->
         NavHost(nav, startDestination = startRoute, modifier = Modifier.fillMaxSize().padding(pad)) {
             composable("discover") {
-                DiscoverScreen(onOpenEvent = { nav.navigate("event/$it") }, jumpTo = jumpTo, onJumpConsumed = { jumpTo = null })
+                DiscoverScreen(onOpenEvent = { nav.navigate("event/$it") }, onOpenVenue = { nav.navigate("venue/$it") },
+                    jumpTo = jumpTo, onJumpConsumed = { jumpTo = null })
             }
+            composable("recent") { RecentScreen(onOpenEvent = { nav.navigate("event/$it") }) }
             composable("calendar") {
                 CalendarScreen(onOpenEvent = { nav.navigate("event/$it") }, onShowAgenda = { d -> jumpTo = d; nav.goTab("discover") })
             }

@@ -48,6 +48,8 @@ data class EventEntity(
     val inFeed: Boolean = true,
     /** True only for clearly labelled development fixtures (never shown as real events). */
     val isFixture: Boolean = false,
+    /** When the event first appeared in the feed (epoch millis); null for events that were already listed when the feed started. */
+    val announcedAt: Long? = null,
 )
 
 @Entity(tableName = "venues")

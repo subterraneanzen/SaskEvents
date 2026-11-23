@@ -177,6 +177,9 @@ def test_full_run(tmp_path):
     b3 = run(CONFIG, tmp_path / "out2", tmp_path / "out3", force=True, fetcher=f, geocode=False, now=now.replace(day=20))
     k = [e for e in b3["events"] if e["title"] == "Karaoke"][0]
     assert k["status"] == "unlisted" and "No longer listed" in k["statusNote"]
+    # The first run's timestamp is carried forward so the app can tell new announcements from the initial load.
+    assert b["firstRunAt"] == b2["firstRunAt"] == b3["firstRunAt"] == b["generatedAt"]
+    assert all(e["firstSeen"] == b["firstRunAt"] for e in b3["events"] if e["id"] in {x["id"] for x in ev})
 
 
 def test_regrouped_event_is_superseded_not_unlisted(tmp_path):

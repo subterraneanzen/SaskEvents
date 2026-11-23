@@ -4,7 +4,7 @@ A lightweight Android app that answers one question: **what's happening around t
 Live music comes first, with comedy, theatre, markets, festivals, community and family events alongside it.
 
 * **App:** Kotlin, Jetpack Compose (Material 3), Room, WorkManager, DataStore, OkHttp, Coil.
-* **Backend:** a Python job on GitHub Actions collects events every 6 hours from venue sites and public listings and
+* **Backend:** a Python job on GitHub Actions collects events once a day from venue sites and public listings and
   publishes a static JSON feed on the `feed` branch. No server and no cost; the phone never crawls the web.
 
 ## Install
@@ -54,7 +54,7 @@ python -m ingest.main --config config --prev ../feed --out ../feed --force   # w
 ```
 
 ## Deploying the backend
-It is already deployed: `.github/workflows/ingest.yml` runs every 6 hours, on every push that changes `backend/`,
+It is already deployed: `.github/workflows/ingest.yml` runs once a day, on every push that changes `backend/`,
 and on demand (**Actions → Ingest events → Run workflow**, with "force" to re-check every source now).
 Optional: add a free Ticketmaster Discovery key as repository secret `TICKETMASTER_API_KEY` for arena and theatre listings.
 To use a fork, change `FEED_BASE_URL` in `android/app/build.gradle.kts`.

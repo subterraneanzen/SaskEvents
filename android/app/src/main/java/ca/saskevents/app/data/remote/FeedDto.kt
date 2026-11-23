@@ -27,6 +27,8 @@ data class CityDto(
 data class Bundle(
     val schemaVersion: Int = 1,
     val generatedAt: String,
+    /** When the feed first started collecting; events first seen then were already listed, not newly announced. */
+    val firstRunAt: String? = null,
     val city: CityDto,
     val events: List<EventDto> = emptyList(),
     val venues: List<VenueDto> = emptyList(),

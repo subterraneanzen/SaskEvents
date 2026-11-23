@@ -74,8 +74,12 @@ def run(config_dir: Path, prev_dir: Path, out_dir: Path, *, force: bool = False,
                 raws.extend(raw_from_json(x) for x in cached["events"])
             states.append(st)
             continue
+        freq = float(s.get("frequencyHours", 24))
+        # Scheduled runs drift by up to a few hours on GitHub, so allow some slack; otherwise a daily source
+        # whose last run started late would be skipped the next day and only be checked every 48 h.
+        slack = timedelta(hours=min(3.0, freq / 4))
         due = force or not st.get("lastAttempt") or \
-            datetime.fromisoformat(st["lastAttempt"]) + timedelta(hours=float(s.get("frequencyHours", 6))) - timedelta(minutes=20) <= now
+            datetime.fromisoformat(st["lastAttempt"]) + timedelta(hours=freq) - slack <= now
         if not due and cached:
             raws.extend(raw_from_json(x) for x in cached["events"])
             healthy.add(s["id"]) if st.get("status") == "ok" else None
@@ -142,9 +146,14 @@ def run(config_dir: Path, prev_dir: Path, out_dir: Path, *, force: bool = False,
     for s in states:
         s["eventsInFeed"] = sum(1 for e in events if any(x["sourceId"] == s["id"] for x in e["sources"]))
 
+    # When the feed first started collecting. Events first seen in that initial run were not "announced" then,
+    # they were just already listed, so the app leaves them out of "Recently announced".
+    first_run = prev_bundle.get("firstRunAt") or min(
+        (e["firstSeen"] for e in prev_bundle.get("events", []) if e.get("firstSeen")), default=None) or _iso(now)
     bundle = {
         "schemaVersion": SCHEMA_VERSION,
         "generatedAt": _iso(now),
+        "firstRunAt": first_run,
         "city": venues_cfg["city"],
         "events": events,
         "venues": registry.export(),

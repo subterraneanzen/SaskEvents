@@ -101,7 +101,6 @@ class CalendarViewModel(private val c: AppContainer) : ViewModel() {
     fun select(d: LocalDate) { selected.value = d; if (YearMonth.from(d) != shownMonth()) month.value = YearMonth.from(d) }
     fun next() { val m = shownMonth().plusMonths(1); month.value = m; selected.value = m.atDay(1) }
     fun prev() { val m = shownMonth().minusMonths(1); month.value = m; selected.value = m.atDay(1) }
-    fun today_() { month.value = null; selected.value = null }
     fun toggleBookmark(e: EventEntity) { viewModelScope.launch { c.repository.toggleBookmark(e) } }
 }
 
@@ -114,7 +113,6 @@ fun CalendarScreen(onOpenEvent: (String) -> Unit, onShowAgenda: (LocalDate) -> U
             Text(s.month.month.getDisplayName(TextStyle.FULL, Locale.CANADA) + " " + s.month.year,
                 style = MaterialTheme.typography.headlineSmall, modifier = Modifier.weight(1f).testTag("monthLabel"))
             IconButton(onClick = vm::prev) { Icon(Icons.AutoMirrored.Filled.KeyboardArrowLeft, "Previous month") }
-            TextButton(onClick = vm::today_) { Text("Today") }
             IconButton(onClick = vm::next) { Icon(Icons.AutoMirrored.Filled.KeyboardArrowRight, "Next month") }
         }
         if (s.filtered) Text("Filters from Discover are applied", style = MaterialTheme.typography.labelSmall, color = Palette.Clay, modifier = Modifier.padding(horizontal = 16.dp))
@@ -123,7 +121,7 @@ fun CalendarScreen(onOpenEvent: (String) -> Unit, onShowAgenda: (LocalDate) -> U
         Row(Modifier.fillMaxWidth().padding(start = 16.dp, end = 8.dp), verticalAlignment = Alignment.CenterVertically) {
             Text(relativeDayLabel(s.selected, s.currentDate, DateTimeFormatter.ofPattern("EEEE, MMMM d", Locale.CANADA)), style = MaterialTheme.typography.titleSmall, modifier = Modifier.weight(1f))
             TextButton(onClick = { onShowAgenda(s.selected) }) {
-                Icon(Icons.AutoMirrored.Outlined.ViewList, null, Modifier.size(16.dp)); Text(" Week agenda")
+                Icon(Icons.AutoMirrored.Outlined.ViewList, null, Modifier.size(16.dp)); Text(" Monthly agenda")
             }
         }
         if (s.dayEvents.isEmpty()) EmptyState("Nothing listed", "No events found for this day.")

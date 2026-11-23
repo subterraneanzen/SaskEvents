@@ -4,7 +4,9 @@ import android.content.Intent
 import android.graphics.Bitmap
 import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.junit4.createEmptyComposeRule
+import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithTag
+import androidx.compose.ui.test.performTextInput
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onFirst
@@ -58,6 +60,30 @@ class AppFlowTest {
             // Select the first day this month that has events.
             upcoming.firstOrNull { it.date.month == today().month }?.let { compose.onNodeWithTag("day-${it.date}").performClick() }
             shot("02_calendar")
+            // The calendar header no longer has a "Today" button.
+            assertTrue(compose.onAllNodesWithText("Today").fetchSemanticsNodes().isEmpty())
+            compose.onNodeWithText("Monthly agenda", substring = true).performClick()
+            compose.waitUntil(10_000) { compose.onAllNodes(hasTestTag("agenda")).fetchSemanticsNodes().isNotEmpty() }
+            compose.onNodeWithTag("rangeLabel").assertExists()
+            shot("02b_monthly_agenda")
+
+            // Search by venue, then open the venue's list of upcoming shows.
+            upcoming.firstOrNull { it.venue != null }?.venue?.let { v ->
+                compose.onNodeWithContentDescription("Search").performClick()
+                compose.onNodeWithTag("search").performTextInput(v.name)
+                compose.waitUntil(10_000) { compose.onAllNodes(hasTestTag("venue-${v.id}")).fetchSemanticsNodes().isNotEmpty() }
+                shot("11_venue_search")
+                compose.onNodeWithTag("venue-${v.id}").performClick()
+                compose.waitUntil(10_000) { compose.onAllNodes(hasTestTag("venueEvents")).fetchSemanticsNodes().isNotEmpty() }
+                shot("12_venue_shows")
+                compose.onNodeWithContentDescription("Back").performClick()
+                compose.waitUntil(10_000) { compose.onAllNodes(hasTestTag("agenda")).fetchSemanticsNodes().isNotEmpty() }
+                compose.onNodeWithContentDescription("Clear search").performClick()
+            }
+
+            compose.onNodeWithTag("tab-recent").performClick()
+            compose.waitUntil(10_000) { compose.onAllNodesWithText("Recently announced").fetchSemanticsNodes().isNotEmpty() }
+            shot("13_recently_announced")
 
             compose.onNodeWithTag("tab-settings").performClick()
             compose.onNodeWithTag("radius").assertExists()

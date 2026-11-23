@@ -4,7 +4,7 @@ name: Ingest events
 # The Android app downloads https://raw.githubusercontent.com/<owner>/<repo>/feed/index.json
 on:
   schedule:
-    - cron: "17 */6 * * *"   # every 6 hours (per-source frequency is enforced inside the job)
+    - cron: "17 10 * * *"    # once a day, 04:17 Saskatoon time (per-source frequency is enforced inside the job)
   workflow_dispatch:
     inputs:
       force:

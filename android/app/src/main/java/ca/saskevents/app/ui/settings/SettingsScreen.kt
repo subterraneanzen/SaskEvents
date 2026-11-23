@@ -153,7 +153,7 @@ fun SettingsScreen(onSources: () -> Unit) {
 
         SectionLabel("Updates")
         Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-            listOf(6, 12, 24).forEach { h -> Chip("Every ${h}h", s.syncHours == h) { vm.setSync(h, s.wifiOnly) } }
+            listOf(12 to "Every 12h", 24 to "Daily", 48 to "Every 2 days").forEach { (h, label) -> Chip(label, s.syncHours == h) { vm.setSync(h, s.wifiOnly) } }
         }
         Toggle("Wi-Fi only", "Only download updates on unmetered networks", s.wifiOnly) { vm.setSync(s.syncHours, it) }
         val df = DateFormat.getDateTimeInstance(DateFormat.MEDIUM, DateFormat.SHORT)

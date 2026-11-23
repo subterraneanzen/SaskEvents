@@ -35,7 +35,8 @@ val todayFlow: Flow<LocalDate> = flow {
         val now = ZonedDateTime.now(LOCAL_ZONE)
         emit(now.toLocalDate())
         val untilMidnight = Duration.between(now, now.toLocalDate().plusDays(1).atStartOfDay(LOCAL_ZONE)).toMillis()
-        delay(minOf(untilMidnight + 500, 60_000L))
+        // Wake at midnight; the 15-minute cap only catches manual clock or time-zone changes.
+        delay(minOf(untilMidnight + 500, 15 * 60_000L))
     }
 }.distinctUntilChanged()
 
