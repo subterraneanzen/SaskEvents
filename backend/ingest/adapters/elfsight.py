@@ -178,9 +178,9 @@ def parse_boot(data: dict, source: dict, today: Optional[date] = None) -> list[R
     return out
 
 
-def fetch(source: dict, fetcher) -> list[RawEvent]:
+def fetch(source: dict, fetcher, today=None) -> list[RawEvent]:
     opts = source["options"]
     # The boot endpoint is the widget's public data API; robots.txt of the venue site governs the page, and
     # core.service.elfsight.com is checked by the fetcher like any other host.
     r = fetcher.get(BOOT_URL, params={"page": opts["pageUrl"], "w": opts["widgetId"]})
-    return parse_boot(r.json(), source)
+    return parse_boot(r.json(), source, today=today)

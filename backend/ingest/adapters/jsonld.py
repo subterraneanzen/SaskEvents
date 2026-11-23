@@ -208,7 +208,7 @@ def _to_raw(ev: dict, source: dict, page_url: str) -> Optional[RawEvent]:
     )
 
 
-def fetch(source: dict, fetcher) -> list[RawEvent]:
+def fetch(source: dict, fetcher, today=None) -> list[RawEvent]:
     urls = [source["url"]] + list(source.get("options", {}).get("extraPages", []))
     out: list[RawEvent] = []
     errors = []

@@ -56,7 +56,7 @@ def parse(data: dict, source: dict) -> list[RawEvent]:
     return out
 
 
-def fetch(source: dict, fetcher) -> list[RawEvent]:
+def fetch(source: dict, fetcher, today=None) -> list[RawEvent]:
     opts = source.get("options", {})
     key = os.environ.get(opts.get("apiKeyEnv", "TICKETMASTER_API_KEY"), "").strip()
     if not key:

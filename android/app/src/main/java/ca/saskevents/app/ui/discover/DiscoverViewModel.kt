@@ -13,6 +13,7 @@ import ca.saskevents.app.domain.FilterState
 import ca.saskevents.app.domain.dateRange
 import ca.saskevents.app.domain.matches
 import ca.saskevents.app.domain.today
+import ca.saskevents.app.domain.todayFlow
 import ca.saskevents.app.domain.weekStart
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -36,19 +37,25 @@ data class DiscoverState(
     val settings: Settings = Settings(),
     val venues: List<VenueEntity> = emptyList(),
     val loaded: Boolean = false,
+    val currentDate: LocalDate = today(),
 )
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class DiscoverViewModel(private val c: AppContainer) : ViewModel() {
-    private val week = MutableStateFlow(weekStart(today()))
+    /** The Monday of the week being viewed; null means "the current week", which moves on by itself. */
+    private val week = MutableStateFlow<LocalDate?>(null)
     val syncing = MutableStateFlow(false)
 
-    private val range = combine(week, c.prefs.filters) { w, f ->
-        dateRange(f.datePreset, today(), f.customFrom, f.customTo)?.let { Triple(it.first, it.second, false) }
-            ?: Triple(w, w.plusDays(6), true)
+    // Re-evaluated when the date rolls over, so "Today"/"Tomorrow" presets and labels never point at yesterday.
+    private val range = combine(week, c.prefs.filters, todayFlow) { w, f, t ->
+        val wk = w ?: weekStart(t)
+        val r = dateRange(f.datePreset, t, f.customFrom, f.customTo)?.let { Triple(it.first, it.second, false) }
+            ?: Triple(wk, wk.plusDays(6), true)
+        r to t
     }
 
-    val state: StateFlow<DiscoverState> = range.flatMapLatest { (from, to, isWeek) ->
+    val state: StateFlow<DiscoverState> = range.flatMapLatest { (r, day) ->
+        val (from, to, isWeek) = r
         combine(c.repository.eventsBetween(from, to), c.prefs.filters, c.prefs.settings, c.repository.venues()) { items, f, s, venues ->
             val area = c.repository.area(s)
             val visible = items.filter { !it.event.isFixture && it.matches(f, area) }
@@ -61,10 +68,10 @@ class DiscoverViewModel(private val c: AppContainer) : ViewModel() {
                 }
             }
             val highlights = if (f.isEmpty) visible
-                .filter { it.status == EventStatus.SCHEDULED && it.event.imageUrl != null && it.event.highlightScore >= 4 && !it.date.isBefore(today()) }
+                .filter { it.status == EventStatus.SCHEDULED && it.event.imageUrl != null && it.event.highlightScore >= 4 && !it.date.isBefore(day) }
                 .sortedWith(compareByDescending<EventItem> { it.event.highlightScore }.thenBy { it.event.startEpochDay })
                 .take(3) else emptyList()
-            DiscoverState(from, to, isWeek, byDay, highlights, visible.size, f, s, venues, loaded = true)
+            DiscoverState(from, to, isWeek, byDay, highlights, visible.size, f, s, venues, loaded = true, currentDate = day)
         }
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), DiscoverState())
 
@@ -86,13 +93,14 @@ class DiscoverViewModel(private val c: AppContainer) : ViewModel() {
         }
     }
 
-    fun nextWeek() { week.value = week.value.plusWeeks(1) }
-    fun prevWeek() { week.value = week.value.minusWeeks(1) }
+    private fun setWeek(monday: LocalDate) { week.value = monday.takeIf { it != weekStart(today()) } }
+    fun nextWeek() = setWeek((week.value ?: weekStart(today())).plusWeeks(1))
+    fun prevWeek() = setWeek((week.value ?: weekStart(today())).minusWeeks(1))
     fun thisWeek() {
-        week.value = weekStart(today())
+        week.value = null
         viewModelScope.launch { val f = c.prefs.filters.first(); if (f.datePreset != DatePreset.NONE) c.prefs.setFilters(f.copy(datePreset = DatePreset.NONE)) }
     }
-    fun goToWeekOf(d: LocalDate) { week.value = weekStart(d) }
+    fun goToWeekOf(d: LocalDate) = setWeek(weekStart(d))
 
     fun setFilters(f: FilterState) { viewModelScope.launch { c.prefs.setFilters(f) } }
     fun clearFilters() { viewModelScope.launch { c.prefs.setFilters(FilterState()) } }

@@ -3,10 +3,16 @@ package ca.saskevents.app.domain
 import ca.saskevents.app.data.local.ArtistEntity
 import ca.saskevents.app.data.local.EventEntity
 import ca.saskevents.app.data.local.VenueEntity
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.flow
 import java.time.DayOfWeek
+import java.time.Duration
 import java.time.LocalDate
 import java.time.LocalTime
 import java.time.ZoneId
+import java.time.ZonedDateTime
 import java.time.format.DateTimeFormatter
 import java.util.Locale
 import kotlin.math.asin
@@ -18,6 +24,29 @@ import kotlin.math.sqrt
 val LOCAL_ZONE: ZoneId = ZoneId.of("America/Regina")
 
 fun today(): LocalDate = LocalDate.now(LOCAL_ZONE)
+
+/**
+ * The local date, re-emitted whenever it changes. Screens must use this (not a one-off [today] call) for anything
+ * labelled "Today"/"Tomorrow", otherwise an app left open or in the background over midnight keeps showing
+ * yesterday as "Today". Checks at least once a minute because coroutine delays don't advance while the phone sleeps.
+ */
+val todayFlow: Flow<LocalDate> = flow {
+    while (true) {
+        val now = ZonedDateTime.now(LOCAL_ZONE)
+        emit(now.toLocalDate())
+        val untilMidnight = Duration.between(now, now.toLocalDate().plusDays(1).atStartOfDay(LOCAL_ZONE)).toMillis()
+        delay(minOf(untilMidnight + 500, 60_000L))
+    }
+}.distinctUntilChanged()
+
+private val DAY_LABEL: DateTimeFormatter = DateTimeFormatter.ofPattern("EEE, MMM d", Locale.CANADA)
+
+/** "Today · Sun, Nov 22", "Tomorrow · Mon, Nov 23", otherwise just the date. */
+fun relativeDayLabel(day: LocalDate, today: LocalDate, fmt: DateTimeFormatter = DAY_LABEL): String = when (day) {
+    today -> "Today · " + day.format(fmt)
+    today.plusDays(1) -> "Tomorrow · " + day.format(fmt)
+    else -> day.format(fmt)
+}
 
 /** Weeks run Monday–Sunday. */
 fun weekStart(d: LocalDate): LocalDate = d.minusDays((d.dayOfWeek.value - DayOfWeek.MONDAY.value).toLong())
