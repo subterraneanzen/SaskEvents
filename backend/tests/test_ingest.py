@@ -4,7 +4,7 @@ from pathlib import Path
 
 import pytest
 
-from ingest.adapters import amigos, broadway, elfsight, ics, jsonld
+from ingest.adapters import amigos, broadway, elfsight, ics, jsonld, jumpcomedy
 from ingest.main import run
 from ingest.normalize import infer_category, parse_age, parse_price, performers_from_title
 
@@ -109,6 +109,8 @@ class FixtureFetcher:
             "https://www.bandsintown.com/c/saskatoon-sk": "bandsintown.html",
             "https://allevents.in/saskatoon/capitol": "allevents.html",
             elfsight.BOOT_URL: "elfsight_boot.json",
+            jumpcomedy.WIDGET_URL.format(id=8): "jumpcomedy_artbar.json",
+            jumpcomedy.WIDGET_URL.format(id=9): "jumpcomedy_artbar.json",
         }
 
     def get(self, url, params=None, headers=None, check_robots=True):
@@ -158,6 +160,10 @@ def test_full_run(tmp_path):
     # Missing info stays missing
     trivia = [e for e in ev if e["title"] == "Amigos Trivia Night"][0]
     assert trivia["ageRestriction"] is None and trivia["priceText"] is None and trivia["category"] == "community"
+    # Art Bar: official Jump Comedy widget, two widgets listing the same shows -> no duplicates
+    assert states["artbar"]["status"] == "ok"
+    ab = [e for e in ev if e["venueId"] == "art-bar"]
+    assert len([e for e in ab if e["title"] == "Edges"]) == 2
     assert (tmp_path / "out" / "saskatoon" / "report.md").exists()
 
     # Second run a day later with Black Cat no longer listing Karaoke: event kept, then flagged after 2 misses.
@@ -287,3 +293,27 @@ def test_art_bar_listings_resolve_to_art_bar_venue():
     ev = RawEvent("x", "k", "u", "Show", d, venue_name="Back Room", venue_address="229 20th St W, Saskatoon, SK")
     assert reg.resolve(ev) == "art-bar"
     assert SRC["artbar"]["venueId"] == "art-bar" and SRC["artbar"]["enabled"]
+
+
+def test_jumpcomedy_artbar_widget():
+    data = json.loads((FX / "jumpcomedy_artbar.json").read_text())
+    evs = jumpcomedy.parse_widget(data, SRC["artbar"], today=date(2026, 11, 25))
+    by = {}
+    for e in evs:
+        by.setdefault(e.title, []).append(e)
+    # Comedy Pit on Nov 24 is past; Dec 8 remains. External seller (Showpass) is the ticket link.
+    pit = by["The Comedy Pit- a showcase of CLEAN standup comedy"]
+    assert [e.start_date for e in pit] == [date(2026, 12, 8)] and "showpass.com" in pit[0].ticket_url
+    assert pit[0].start_time == time(19, 0) and pit[0].price_text == "$10" and pit[0].venue_id == "art-bar"
+    # Generic " - COMEDY" label stripped and used as a hint; descriptive labels stay in the title.
+    hp = by["Hassan Phills"]
+    assert hp[0].category_hint == "comedy" and hp[0].start_time == time(21, 30)
+    assert "sold_out" in hp[1].tags and "sold_out" not in hp[0].tags
+    assert "Out Of This World!- INTERGALACTIC SPACE DRAG" in by
+    assert by["Edges"][0].category_hint == "theatre" and len(by["Edges"]) == 2
+    # Live early-bird price gives a range; the expired Nov 7 override price is ignored.
+    sb = by["Stitch Bitch Drag Show"][0]
+    assert sb.price_text == "$20–$30" and sb.price_min == 20
+    # Jump-sold show: ticket link is its Jump Comedy event page.
+    assert by["Henry Sir Comedy"][0].ticket_url == "https://www.jumpcomedy.com/e/henry-sir-comedy"
+    assert sb.age_text == "19+ (venue policy)" and sb.venue_address.startswith("229 20th St W")

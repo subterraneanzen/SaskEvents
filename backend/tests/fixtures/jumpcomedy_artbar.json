@@ -1,0 +1,488 @@
+{
+ "data": {
+  "config": {
+   "colors": [],
+   "domain": "www.jumpcomedy.com",
+   "list_type": "calendar-event-list",
+   "sources": [
+    {
+     "id": "venue_01JD2T0NSD4ZXE9XSQGKZEDK3V",
+     "type": "venue"
+    }
+   ]
+  },
+  "events": [
+   {
+    "external_order_url": "https://www.showpass.com/the-comedy-pit-a-showcase-of-clean-stand-up-comedy-4/",
+    "favorites": "",
+    "gigSheetTemplates": "",
+    "handle": "the-comedy-pit-clean-comedy-showcase",
+    "id": "prod_01K16FE244HPN23084GV6MKXYG",
+    "is_out_of_stock": false,
+    "is_taxable": true,
+    "status": "published",
+    "thumbnail": "https://jumpcomedy.b-cdn.net/waffle/uploads/pMNS-11%20x%2017%20comedy%20pit%20season%206%20starts.png?width=500",
+    "title": "The Comedy Pit- a showcase of CLEAN standup comedy",
+    "type_id": "product_type_event",
+    "variants": [
+     {
+      "display_showtime": true,
+      "id": "variant_019fb385-0e03-7ea8-b53d-1e2621883211",
+      "inventory_quantity": 80,
+      "is_out_of_stock": false,
+      "low_stock_message": null,
+      "manage_inventory": true,
+      "original_inventory_quantity": 80,
+      "prices": [
+       {
+        "amount": 1000,
+        "currency_code": "cad",
+        "price_list": null,
+        "pricing_type": "regular"
+       }
+      ],
+      "seatingChart": null,
+      "startsAt": "2026-11-24T19:00",
+      "startsAtUtc": "2026-11-25T01:00:00Z",
+      "starts_at": "2026-11-24T19:00",
+      "starts_at_time": "",
+      "starts_at_utc": "2026-11-25T01:00:00Z",
+      "thumbnail": "https://jumpcomedy.b-cdn.net/waffle/uploads/jFnC-comedypitNovember%2024.png?width=500",
+      "ticket_type_label": null,
+      "virtual_event_timezone": null
+     },
+     {
+      "display_showtime": true,
+      "id": "variant_019fb385-6f61-753f-a610-09a1dad6bd13",
+      "inventory_quantity": 80,
+      "is_out_of_stock": false,
+      "low_stock_message": null,
+      "manage_inventory": true,
+      "original_inventory_quantity": 80,
+      "prices": [
+       {
+        "amount": 1000,
+        "currency_code": "cad",
+        "price_list": null,
+        "pricing_type": "regular"
+       }
+      ],
+      "seatingChart": null,
+      "startsAt": "2026-12-08T19:00",
+      "startsAtUtc": "2026-12-09T01:00:00Z",
+      "starts_at": "2026-12-08T19:00",
+      "starts_at_time": "",
+      "starts_at_utc": "2026-12-09T01:00:00Z",
+      "thumbnail": null,
+      "ticket_type_label": null,
+      "virtual_event_timezone": null
+     }
+    ],
+    "venueArrangement": {
+     "venue": {
+      "address": "229 20th St W",
+      "city": {
+       "name": "Saskatoon"
+      },
+      "eventDisplayMode": null,
+      "id": "venue_01JD2T0NSD4ZXE9XSQGKZEDK3V",
+      "is_show_follow_option_enabled": true,
+      "is_virtual": false,
+      "name": "Art Bar",
+      "providerPlaceId": "ChIJwUc9LgD3BFMRo5wfxC1e7_c",
+      "province": "SK",
+      "slug": "art-bar-1",
+      "timezone": "America/Regina"
+     }
+    }
+   },
+   {
+    "external_order_url": null,
+    "favorites": "",
+    "gigSheetTemplates": "",
+    "handle": "stitch-bitch-drag-show",
+    "id": "product_01a184ed-680d-7f49-b897-e635c10ba608",
+    "is_out_of_stock": false,
+    "is_taxable": true,
+    "status": "published",
+    "thumbnail": null,
+    "title": "Stitch Bitch Drag Show",
+    "type_id": "product_type_event",
+    "variants": [
+     {
+      "display_showtime": true,
+      "id": "variant_01a184ed-684b-720c-afb0-598363d137d4",
+      "inventory_quantity": 25,
+      "is_out_of_stock": false,
+      "low_stock_message": null,
+      "manage_inventory": true,
+      "original_inventory_quantity": 80,
+      "prices": [
+       {
+        "amount": 3000,
+        "currency_code": "cad",
+        "price_list": null,
+        "pricing_type": "regular"
+       },
+       {
+        "amount": 2000,
+        "currency_code": "cad",
+        "price_list": {
+         "ends_at": "2026-11-28T02:00:00Z",
+         "starts_at": null
+        },
+        "pricing_type": "early_bird"
+       },
+       {
+        "amount": 1500,
+        "currency_code": "cad",
+        "price_list": {
+         "ends_at": "2026-11-07T05:45:00Z",
+         "starts_at": null
+        },
+        "pricing_type": "override"
+       }
+      ],
+      "seatingChart": null,
+      "startsAt": "2026-11-27T21:00",
+      "startsAtUtc": "2026-11-28T03:00:00Z",
+      "starts_at": "2026-11-27T21:00",
+      "starts_at_time": "",
+      "starts_at_utc": "2026-11-28T03:00:00Z",
+      "thumbnail": null,
+      "ticket_type_label": null,
+      "virtual_event_timezone": null
+     }
+    ],
+    "venueArrangement": {
+     "venue": {
+      "address": "229 20th St W",
+      "city": {
+       "name": "Saskatoon"
+      },
+      "eventDisplayMode": null,
+      "id": "venue_01JD2T0NSD4ZXE9XSQGKZEDK3V",
+      "is_show_follow_option_enabled": true,
+      "is_virtual": false,
+      "name": "Art Bar",
+      "providerPlaceId": "ChIJwUc9LgD3BFMRo5wfxC1e7_c",
+      "province": "SK",
+      "slug": "art-bar-1",
+      "timezone": "America/Regina"
+     }
+    }
+   },
+   {
+    "external_order_url": null,
+    "favorites": "",
+    "gigSheetTemplates": "",
+    "handle": "out-of-this-world-intergalactic-space-drag",
+    "id": "product_01a1a203-4a28-7ae7-acee-6e6e71fe66ba",
+    "is_out_of_stock": false,
+    "is_taxable": true,
+    "status": "published",
+    "thumbnail": null,
+    "title": "Out Of This World!- INTERGALACTIC SPACE DRAG",
+    "type_id": "product_type_event",
+    "variants": [
+     {
+      "display_showtime": true,
+      "id": "variant_01a1a203-4a5a-75b5-81c6-fdef577297ed",
+      "inventory_quantity": 80,
+      "is_out_of_stock": false,
+      "low_stock_message": null,
+      "manage_inventory": true,
+      "original_inventory_quantity": 80,
+      "prices": [
+       {
+        "amount": 3000,
+        "currency_code": "cad",
+        "price_list": null,
+        "pricing_type": "regular"
+       },
+       {
+        "amount": 1500,
+        "currency_code": "cad",
+        "price_list": {
+         "ends_at": "2026-11-29T02:00:00Z",
+         "starts_at": null
+        },
+        "pricing_type": "early_bird"
+       }
+      ],
+      "seatingChart": null,
+      "startsAt": "2026-11-28T21:00",
+      "startsAtUtc": "2026-11-29T03:00:00Z",
+      "starts_at": "2026-11-28T21:00",
+      "starts_at_time": "",
+      "starts_at_utc": "2026-11-29T03:00:00Z",
+      "thumbnail": null,
+      "ticket_type_label": null,
+      "virtual_event_timezone": null
+     }
+    ],
+    "venueArrangement": {
+     "venue": {
+      "address": "229 20th St W",
+      "city": {
+       "name": "Saskatoon"
+      },
+      "eventDisplayMode": null,
+      "id": "venue_01JD2T0NSD4ZXE9XSQGKZEDK3V",
+      "is_show_follow_option_enabled": true,
+      "is_virtual": false,
+      "name": "Art Bar",
+      "providerPlaceId": "ChIJwUc9LgD3BFMRo5wfxC1e7_c",
+      "province": "SK",
+      "slug": "art-bar-1",
+      "timezone": "America/Regina"
+     }
+    }
+   },
+   {
+    "external_order_url": null,
+    "favorites": "",
+    "gigSheetTemplates": "",
+    "handle": "edges-musical-song-cycle",
+    "id": "product_01a15ecb-088e-782e-9f17-d210dbf94b99",
+    "is_out_of_stock": false,
+    "is_taxable": true,
+    "status": "published",
+    "thumbnail": null,
+    "title": "Edges - MUSICAL SONG CYCLE",
+    "type_id": "product_type_event",
+    "variants": [
+     {
+      "display_showtime": true,
+      "id": "variant_01a15ecb-08bb-7c79-89d0-d47242dfcc21",
+      "inventory_quantity": 80,
+      "is_out_of_stock": false,
+      "low_stock_message": null,
+      "manage_inventory": true,
+      "original_inventory_quantity": 80,
+      "prices": [
+       {
+        "amount": 3000,
+        "currency_code": "cad",
+        "price_list": null,
+        "pricing_type": "regular"
+       },
+       {
+        "amount": 2400,
+        "currency_code": "cad",
+        "price_list": {
+         "ends_at": "2026-12-03T00:00:00Z",
+         "starts_at": null
+        },
+        "pricing_type": "early_bird"
+       }
+      ],
+      "seatingChart": null,
+      "startsAt": "2026-12-02T19:00",
+      "startsAtUtc": "2026-12-03T01:00:00Z",
+      "starts_at": "2026-12-02T19:00",
+      "starts_at_time": "",
+      "starts_at_utc": "2026-12-03T01:00:00Z",
+      "thumbnail": null,
+      "ticket_type_label": null,
+      "virtual_event_timezone": null
+     },
+     {
+      "display_showtime": true,
+      "id": "variant_01a15ed0-939c-73af-9f64-9d555d46371a",
+      "inventory_quantity": 80,
+      "is_out_of_stock": false,
+      "low_stock_message": null,
+      "manage_inventory": true,
+      "original_inventory_quantity": 80,
+      "prices": [
+       {
+        "amount": 3000,
+        "currency_code": "cad",
+        "price_list": null,
+        "pricing_type": "regular"
+       },
+       {
+        "amount": 2400,
+        "currency_code": "cad",
+        "price_list": {
+         "ends_at": "2026-12-04T00:00:00Z",
+         "starts_at": null
+        },
+        "pricing_type": "early_bird"
+       }
+      ],
+      "seatingChart": null,
+      "startsAt": "2026-12-03T19:00",
+      "startsAtUtc": "2026-12-04T01:00:00Z",
+      "starts_at": "2026-12-03T19:00",
+      "starts_at_time": "",
+      "starts_at_utc": "2026-12-04T01:00:00Z",
+      "thumbnail": null,
+      "ticket_type_label": null,
+      "virtual_event_timezone": null
+     }
+    ],
+    "venueArrangement": {
+     "venue": {
+      "address": "229 20th St W",
+      "city": {
+       "name": "Saskatoon"
+      },
+      "eventDisplayMode": null,
+      "id": "venue_01JD2T0NSD4ZXE9XSQGKZEDK3V",
+      "is_show_follow_option_enabled": true,
+      "is_virtual": false,
+      "name": "Art Bar",
+      "providerPlaceId": "ChIJwUc9LgD3BFMRo5wfxC1e7_c",
+      "province": "SK",
+      "slug": "art-bar-1",
+      "timezone": "America/Regina"
+     }
+    }
+   },
+   {
+    "external_order_url": "https://www.eventbrite.ca/e/hassan-phills-live-in-saskatoon-late-show-tickets-1988857527403?aff=ebdssbdestsearch",
+    "favorites": "",
+    "gigSheetTemplates": "",
+    "handle": "hassan-phills-comedy",
+    "id": "product_01a05e04-642a-7a54-85ba-5603058d656d",
+    "is_out_of_stock": false,
+    "is_taxable": true,
+    "status": "published",
+    "thumbnail": null,
+    "title": "Hassan Phills - COMEDY",
+    "type_id": "product_type_event",
+    "variants": [
+     {
+      "display_showtime": true,
+      "id": "variant_01a05e05-769e-7505-b067-6c2ae10c9b32",
+      "inventory_quantity": 80,
+      "is_out_of_stock": false,
+      "low_stock_message": null,
+      "manage_inventory": true,
+      "original_inventory_quantity": 80,
+      "prices": [
+       {
+        "amount": 3300,
+        "currency_code": "cad",
+        "price_list": null,
+        "pricing_type": "regular"
+       }
+      ],
+      "seatingChart": null,
+      "startsAt": "2027-01-15T21:30",
+      "startsAtUtc": "2027-01-16T03:30:00Z",
+      "starts_at": "2027-01-15T21:30",
+      "starts_at_time": "",
+      "starts_at_utc": "2027-01-16T03:30:00Z",
+      "thumbnail": null,
+      "ticket_type_label": null,
+      "virtual_event_timezone": null
+     },
+     {
+      "display_showtime": true,
+      "id": "variant_01a05e04-645a-7e61-b81b-1578e139df69",
+      "inventory_quantity": 0,
+      "is_out_of_stock": true,
+      "low_stock_message": null,
+      "manage_inventory": true,
+      "original_inventory_quantity": 80,
+      "prices": [
+       {
+        "amount": 3300,
+        "currency_code": "cad",
+        "price_list": null,
+        "pricing_type": "regular"
+       }
+      ],
+      "seatingChart": null,
+      "startsAt": "2027-01-16T21:30",
+      "startsAtUtc": "2027-01-17T03:30:00Z",
+      "starts_at": "2027-01-16T21:30",
+      "starts_at_time": "",
+      "starts_at_utc": "2027-01-17T03:30:00Z",
+      "thumbnail": null,
+      "ticket_type_label": null,
+      "virtual_event_timezone": null
+     }
+    ],
+    "venueArrangement": {
+     "venue": {
+      "address": "229 20th St W",
+      "city": {
+       "name": "Saskatoon"
+      },
+      "eventDisplayMode": null,
+      "id": "venue_01JD2T0NSD4ZXE9XSQGKZEDK3V",
+      "is_show_follow_option_enabled": true,
+      "is_virtual": false,
+      "name": "Art Bar",
+      "providerPlaceId": "ChIJwUc9LgD3BFMRo5wfxC1e7_c",
+      "province": "SK",
+      "slug": "art-bar-1",
+      "timezone": "America/Regina"
+     }
+    }
+   },
+   {
+    "external_order_url": null,
+    "favorites": "",
+    "gigSheetTemplates": "",
+    "handle": "henry-sir-comedy",
+    "id": "product_01a00196-3650-7ff7-bd26-b6f79ea35495",
+    "is_out_of_stock": false,
+    "is_taxable": true,
+    "status": "published",
+    "thumbnail": null,
+    "title": "Henry Sir Comedy ",
+    "type_id": "product_type_event",
+    "variants": [
+     {
+      "display_showtime": true,
+      "id": "variant_01a0019a-46b7-72bd-a271-b9325c82b35b",
+      "inventory_quantity": 1,
+      "is_out_of_stock": false,
+      "low_stock_message": "Only 1 left",
+      "manage_inventory": true,
+      "original_inventory_quantity": 80,
+      "prices": [
+       {
+        "amount": 2900,
+        "currency_code": "cad",
+        "price_list": null,
+        "pricing_type": "regular"
+       }
+      ],
+      "seatingChart": null,
+      "startsAt": "2027-02-20T19:00",
+      "startsAtUtc": "2027-02-21T01:00:00Z",
+      "starts_at": "2027-02-20T19:00",
+      "starts_at_time": "",
+      "starts_at_utc": "2027-02-21T01:00:00Z",
+      "thumbnail": null,
+      "ticket_type_label": null,
+      "virtual_event_timezone": null
+     }
+    ],
+    "venueArrangement": {
+     "venue": {
+      "address": "229 20th St W",
+      "city": {
+       "name": "Saskatoon"
+      },
+      "eventDisplayMode": null,
+      "id": "venue_01JD2T0NSD4ZXE9XSQGKZEDK3V",
+      "is_show_follow_option_enabled": true,
+      "is_virtual": false,
+      "name": "Art Bar",
+      "providerPlaceId": "ChIJwUc9LgD3BFMRo5wfxC1e7_c",
+      "province": "SK",
+      "slug": "art-bar-1",
+      "timezone": "America/Regina"
+     }
+    }
+   }
+  ]
+ }
+}
