@@ -35,7 +35,7 @@ The app's **Settings → Data sources** screen shows the same information.
 
 * Identified user agent `SaskEventsBot/1.0 (+repo URL; personal non-commercial…)`.
 * robots.txt checked for every host before fetching; disallowed paths are skipped and reported, never worked around.
-* At most one request per 1.5 s per host; most sources are checked every 6–24 h.
+* At most one request per 1.5 s per host; each source is checked once a day.
 * Official APIs (Ticketmaster, Nominatim geocoding) follow their own usage terms.
 * No logins, private social-media data or paywalled content.
 

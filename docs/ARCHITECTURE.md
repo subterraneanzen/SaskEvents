@@ -3,11 +3,11 @@
 ```
  ┌──────────────── GitHub (free) ─────────────────┐            ┌──────────── Android phone ────────────┐
  │                                                │            │                                        │
- │  backend/config/sources.json  (source registry)│            │  WorkManager (every 6/12/24 h,         │
+ │  backend/config/sources.json  (source registry)│            │  WorkManager (every 12/24/48 h,        │
  │  backend/config/venues.json   (venue directory)│            │  battery-not-low, optional Wi-Fi only) │
  │  backend/config/artists.json  (curated artists)│            │        │                               │
  │            │                                   │            │        ▼                               │
- │  Ingest workflow (cron every 6 h)              │  HTTPS     │  FeedApi (OkHttp + HTTP cache/ETag)    │
+ │  Ingest workflow (cron once a day)             │  HTTPS     │  FeedApi (OkHttp + HTTP cache/ETag)    │
  │   adapters → venue match → dedupe → verify →   │──────────▶ │        │                               │
  │   artists → continuity → feed/ branch          │  raw JSON  │        ▼                               │
  │                                                │            │  EventRepository → Room (offline)      │
@@ -21,7 +21,7 @@
 
 * **No server to pay for or babysit.** Event collection runs as a scheduled GitHub Actions job (free for public
   repos). The result is a static JSON file on the `feed` branch, served by `raw.githubusercontent.com` with ETags.
-* **The phone never crawls the web.** It downloads one ~100–300 KB JSON bundle a few times a day, only when the
+* **The phone never crawls the web.** It downloads one ~100–300 KB JSON bundle about once a day, only when the
   bundle changed (HTTP 304 otherwise), and works fully offline from Room afterwards.
 * **Editable without an app update.** Venues, sources and curated artists live in `backend/config/*.json`.
   Editing them on GitHub triggers a fresh ingest; the app picks up the new feed on its next sync.

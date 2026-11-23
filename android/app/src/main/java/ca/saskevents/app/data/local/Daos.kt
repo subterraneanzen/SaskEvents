@@ -27,6 +27,10 @@ interface EventDao {
     @Query("SELECT * FROM events WHERE COALESCE(endEpochDay, startEpochDay) >= :today ORDER BY startEpochDay, startMinutes")
     fun observeUpcoming(today: Long): Flow<List<EventEntity>>
 
+    /** Upcoming events that appeared in the feed after [since] (epoch millis), newest announcement first. */
+    @Query("SELECT * FROM events WHERE announcedAt IS NOT NULL AND announcedAt >= :since AND COALESCE(endEpochDay, startEpochDay) >= :today ORDER BY announcedAt DESC, startEpochDay, startMinutes")
+    fun observeAnnouncedSince(since: Long, today: Long): Flow<List<EventEntity>>
+
     @Upsert suspend fun upsert(events: List<EventEntity>)
 
     @Query("DELETE FROM events WHERE id IN (:ids)")

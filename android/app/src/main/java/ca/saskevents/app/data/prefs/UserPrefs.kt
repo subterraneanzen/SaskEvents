@@ -33,7 +33,7 @@ data class Settings(
     val preferredCategories: Set<String> = emptySet(),
     val defaultView: String = "agenda", // agenda | calendar
     val themeMode: String = "system", // system | light | dark
-    val syncHours: Int = 12,
+    val syncHours: Int = 24,
     val wifiOnly: Boolean = false,
     val notifications: Boolean = false,  // off by default
     val lastSyncMillis: Long = 0,
@@ -83,7 +83,8 @@ class UserPrefs(private val context: Context) {
             preferredCategories = p[K.preferred] ?: emptySet(),
             defaultView = p[K.view] ?: "agenda",
             themeMode = p[K.theme] ?: "system",
-            syncHours = p[K.syncHours] ?: 12,
+            // The feed is rebuilt once a day, so checking more often than every 12 h only costs battery.
+            syncHours = (p[K.syncHours] ?: 24).coerceAtLeast(12),
             wifiOnly = p[K.wifiOnly] ?: false,
             notifications = p[K.notify] ?: false,
             lastSyncMillis = p[K.lastSync] ?: 0,

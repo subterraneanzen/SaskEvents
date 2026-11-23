@@ -7,6 +7,9 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
@@ -56,6 +59,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import ca.saskevents.app.AppContainer
 import ca.saskevents.app.data.local.ArtistEntity
+import ca.saskevents.app.data.local.EventEntity
 import ca.saskevents.app.data.local.VenueEntity
 import ca.saskevents.app.domain.EventItem
 import ca.saskevents.app.domain.EventStatus
@@ -82,6 +86,7 @@ import ca.saskevents.app.util.share
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import java.net.URI
@@ -255,9 +260,11 @@ private fun LinkLine(label: String, url: String) {
 private fun host(url: String) = runCatching { URI(url).host?.removePrefix("www.") }.getOrNull() ?: url
 
 // ------------------------------------------------------------------------------------------- venue
-class VenueViewModel(c: AppContainer, id: String) : ViewModel() {
+class VenueViewModel(private val c: AppContainer, id: String) : ViewModel() {
     val venue = c.repository.venue(id).stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), null)
     val events = c.repository.venueEvents(id).stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
+    val cityName = c.prefs.settings.map { it.cityName }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), "Saskatoon")
+    fun toggleBookmark(e: EventEntity) { viewModelScope.launch { c.repository.toggleBookmark(e) } }
 }
 
 @Composable
@@ -265,11 +272,15 @@ fun VenueScreen(id: String, onBack: () -> Unit, onOpenEvent: (String) -> Unit) {
     val vm = appViewModel(key = "venue-$id") { VenueViewModel(it, id) }
     val v by vm.venue.collectAsState()
     val events by vm.events.collectAsState()
+    val cityName by vm.cityName.collectAsState()
     val ctx = LocalContext.current
     Column(Modifier.fillMaxSize().background(Palette.Paper)) {
         TopBar(v?.name ?: "", onBack)
         val venue: VenueEntity = v ?: return@Column
-        Column(Modifier.verticalScroll(rememberScrollState()).padding(horizontal = 20.dp).padding(bottom = 24.dp)) {
+        // One scrolling list: venue details, then every upcoming show (it used to cut off below the details).
+        LazyColumn(Modifier.fillMaxSize().testTag("venueEvents"), contentPadding = PaddingValues(bottom = 24.dp)) {
+        item(key = "info") {
+        Column(Modifier.padding(horizontal = 20.dp)) {
             Text(venue.name, style = MaterialTheme.typography.headlineSmall)
             Row(horizontalArrangement = Arrangement.spacedBy(6.dp), modifier = Modifier.padding(top = 6.dp)) {
                 venue.type?.let { Pill(it.replace('_', ' ').replaceFirstChar { ch -> ch.uppercase() }) }
@@ -290,13 +301,14 @@ fun VenueScreen(id: String, onBack: () -> Unit, onOpenEvent: (String) -> Unit) {
                 SectionLabel("Verification notes")
                 Text(it, style = MaterialTheme.typography.bodySmall, color = Palette.InkSoft)
             }
-            SectionLabel("Upcoming here (${events.size})")
+            SectionLabel("Upcoming shows here (${events.size})")
+            if (events.isEmpty()) Text("No upcoming shows listed right now.", style = MaterialTheme.typography.bodyMedium, color = Palette.InkSoft)
         }
-        Column {
-            events.take(40).forEach { item ->
-                EventRow(item, "Saskatoon", onClick = { onOpenEvent(item.event.id) }, onBookmark = {}, showDate = true)
-                HorizontalDivider(color = Palette.Line, modifier = Modifier.padding(start = 80.dp))
-            }
+        }
+        items(events, key = { it.event.id }) { item ->
+            EventRow(item, cityName, onClick = { onOpenEvent(item.event.id) }, onBookmark = { vm.toggleBookmark(item.event) }, showDate = true)
+            HorizontalDivider(color = Palette.Line, modifier = Modifier.padding(start = 80.dp))
+        }
         }
     }
 }

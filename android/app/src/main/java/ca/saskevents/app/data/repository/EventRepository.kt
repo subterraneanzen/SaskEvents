@@ -78,6 +78,12 @@ class EventRepository(
         join(db.events().observeUpcoming(Long.MIN_VALUE).map { all -> all.filter { it.id in ids } })
     }
 
+    /** Events announced in the last [days] days that haven't happened yet. */
+    @OptIn(ExperimentalCoroutinesApi::class)
+    fun recentlyAnnounced(days: Int = 21): Flow<List<EventItem>> = todayFlow.flatMapLatest {
+        join(db.events().observeAnnouncedSince(System.currentTimeMillis() - days * 86_400_000L, it.toEpochDay()))
+    }
+
     fun venues() = db.venues().observeAll()
     fun venue(id: String) = db.venues().observe(id)
     fun artist(id: String) = db.artists().observe(id)
@@ -102,19 +108,30 @@ class EventRepository(
             val index = api.index()
             val city = index.cities.firstOrNull { it.id == s.cityId } ?: index.cities.firstOrNull()
                 ?: return fail("Feed lists no cities")
+            // The small index says when the feed was built: if we already have that build, skip the bundle download.
+            if (!force && index.generatedAt != null && marker(index.generatedAt) == s.feedGeneratedAt && db.events().count() > 0) {
+                prefs.recordSync(true, null, s.feedGeneratedAt)
+                return SyncResult(ok = true, changed = false, eventCount = city.eventCount ?: 0)
+            }
             val bundle = api.bundle(city.bundle ?: "${city.id}/bundle.json")
             if (bundle.city.id != s.cityId || bundle.city.name != s.cityName) prefs.setCity(bundle.city.id, bundle.city.name, bundle.city.lat, bundle.city.lon)
-            if (!force && bundle.generatedAt == s.feedGeneratedAt && db.events().count() > 0) {
-                prefs.recordSync(true, null, bundle.generatedAt)
+            if (!force && marker(bundle.generatedAt) == s.feedGeneratedAt && db.events().count() > 0) {
+                prefs.recordSync(true, null, s.feedGeneratedAt)
                 return SyncResult(ok = true, changed = false, eventCount = bundle.events.size)
             }
             val changes = apply(bundle)
-            prefs.recordSync(true, null, bundle.generatedAt)
+            prefs.recordSync(true, null, marker(bundle.generatedAt))
             SyncResult(ok = true, changed = true, eventCount = bundle.events.size, bookmarkChanges = changes)
         } catch (e: Exception) {
             fail(e.message ?: e.javaClass.simpleName)
         }
     }
+
+    /**
+     * What is stored as "the feed build we have". Bumping [APPLY_VERSION] makes existing installs re-apply the
+     * current feed once after an update (v2: fills in announcedAt for "Recently announced").
+     */
+    private fun marker(generatedAt: String) = "$generatedAt#v$APPLY_VERSION"
 
     private suspend fun fail(msg: String): SyncResult {
         prefs.recordSync(false, msg, null)
@@ -123,7 +140,9 @@ class EventRepository(
 
     /** Applies a bundle atomically. Returns status changes on bookmarked events. Visible for tests. */
     suspend fun apply(bundle: Bundle): List<BookmarkChange> = db.withTransaction {
-        val incoming = bundle.events.map { it.toEntity() }
+        val baseline = bundle.firstRunAt?.let(::parseInstantMillis)
+            ?: bundle.events.mapNotNull { it.firstSeen?.let(::parseInstantMillis) }.minOrNull()
+        val incoming = bundle.events.map { it.toEntity(baseline) }
         val incomingIds = incoming.map { it.id }.toSet()
         val bookmarks = db.bookmarks().all().associateBy { it.eventId }
         val existingIds = db.events().allIds()
@@ -183,8 +202,22 @@ class EventRepository(
     }
 }
 
+private const val APPLY_VERSION = 2
+
+fun parseInstantMillis(s: String): Long? = runCatching { java.time.OffsetDateTime.parse(s).toInstant().toEpochMilli() }.getOrNull()
+
+/**
+ * When the event was announced: its first appearance in the feed. Events already listed when the feed started
+ * ([baselineMillis], plus an hour of slack for that first run) were not announced then, so they get null.
+ */
+fun announcedAt(firstSeen: String?, baselineMillis: Long?): Long? {
+    val seen = firstSeen?.let(::parseInstantMillis) ?: return null
+    if (baselineMillis != null && seen <= baselineMillis + 3_600_000L) return null
+    return seen
+}
+
 // ---------------------------------------------------------------------- mappers
-fun EventDto.toEntity() = EventEntity(
+fun EventDto.toEntity(baselineMillis: Long? = null) = EventEntity(
     id = id, title = title, description = description, category = category, tags = tags, performerIds = performerIds,
     venueId = venueId, venueNameRaw = venueNameRaw, municipality = municipality,
     startEpochDay = LocalDate.parse(startDate).toEpochDay(), startMinutes = parseMinutes(startTime),
@@ -195,6 +228,7 @@ fun EventDto.toEntity() = EventEntity(
     imageUrl = imageUrl, sourceUrl = sourceUrl, sourceName = sourceName, sources = sources, links = links,
     verification = verification, status = status, statusNote = statusNote, highlightScore = highlightScore,
     lastVerified = lastVerified, updatedAt = updatedAt, inFeed = true, isFixture = false,
+    announcedAt = announcedAt(firstSeen, baselineMillis),
 )
 
 fun VenueDto.toEntity() = VenueEntity(

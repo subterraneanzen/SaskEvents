@@ -68,7 +68,7 @@ jobs:
           path: out/
 
       - name: Publish rolling "latest" release
-        if: success()
+        if: success() && github.ref == 'refs/heads/main'
         working-directory: .
         env:
           GH_TOKEN: ${{ github.token }}
