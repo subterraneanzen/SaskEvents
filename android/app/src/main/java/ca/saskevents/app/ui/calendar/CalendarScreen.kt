@@ -46,7 +46,9 @@ import ca.saskevents.app.data.local.EventEntity
 import ca.saskevents.app.data.prefs.Settings
 import ca.saskevents.app.domain.EventItem
 import ca.saskevents.app.domain.matches
+import ca.saskevents.app.domain.relativeDayLabel
 import ca.saskevents.app.domain.today
+import ca.saskevents.app.domain.todayFlow
 import ca.saskevents.app.ui.appViewModel
 import ca.saskevents.app.ui.components.DayHeader
 import ca.saskevents.app.ui.components.EmptyState
@@ -73,29 +75,33 @@ data class CalendarState(
     val dayEvents: List<EventItem> = emptyList(),
     val settings: Settings = Settings(),
     val filtered: Boolean = false,
+    val currentDate: LocalDate = today(),
 )
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class CalendarViewModel(private val c: AppContainer) : ViewModel() {
-    private val month = MutableStateFlow(YearMonth.now(ca.saskevents.app.domain.LOCAL_ZONE))
-    private val selected = MutableStateFlow(today())
+    // null = "today", which follows the date when it rolls over at midnight.
+    private val month = MutableStateFlow<YearMonth?>(null)
+    private val selected = MutableStateFlow<LocalDate?>(null)
 
-    val state: StateFlow<CalendarState> = month.flatMapLatest { m ->
+    val state: StateFlow<CalendarState> = combine(month, todayFlow) { m, t -> (m ?: YearMonth.from(t)) to t }.flatMapLatest { (m, t) ->
         val from = m.atDay(1); val to = m.atEndOfMonth()
-        combine(c.repository.eventsBetween(from, to), c.prefs.filters, c.prefs.settings, selected) { items, f, s, sel ->
+        combine(c.repository.eventsBetween(from, to), c.prefs.filters, c.prefs.settings, selected) { items, f, s, selOrNull ->
+            val sel = selOrNull ?: t
             // Calendar ignores date presets (it is its own date navigation) but honours every other filter.
             val ff = f.copy(datePreset = ca.saskevents.app.domain.DatePreset.NONE)
             val area = c.repository.area(s)
             val visible = items.filter { !it.event.isFixture && it.matches(ff, area) }
             val counts = visible.groupingBy { maxOf(it.date, from) }.eachCount()
-            CalendarState(m, sel, counts, visible.filter { it.date == sel || (it.date.isBefore(sel) && (it.event.endEpochDay ?: 0) >= sel.toEpochDay()) }, s, !ff.isEmpty)
+            CalendarState(m, sel, counts, visible.filter { it.date == sel || (it.date.isBefore(sel) && (it.event.endEpochDay ?: 0) >= sel.toEpochDay()) }, s, !ff.isEmpty, t)
         }
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), CalendarState())
 
-    fun select(d: LocalDate) { selected.value = d; if (YearMonth.from(d) != month.value) month.value = YearMonth.from(d) }
-    fun next() { month.value = month.value.plusMonths(1); selected.value = month.value.atDay(1) }
-    fun prev() { month.value = month.value.minusMonths(1); selected.value = month.value.atDay(1) }
-    fun today_() = select(today())
+    private fun shownMonth() = month.value ?: YearMonth.from(today())
+    fun select(d: LocalDate) { selected.value = d; if (YearMonth.from(d) != shownMonth()) month.value = YearMonth.from(d) }
+    fun next() { val m = shownMonth().plusMonths(1); month.value = m; selected.value = m.atDay(1) }
+    fun prev() { val m = shownMonth().minusMonths(1); month.value = m; selected.value = m.atDay(1) }
+    fun today_() { month.value = null; selected.value = null }
     fun toggleBookmark(e: EventEntity) { viewModelScope.launch { c.repository.toggleBookmark(e) } }
 }
 
@@ -112,10 +118,10 @@ fun CalendarScreen(onOpenEvent: (String) -> Unit, onShowAgenda: (LocalDate) -> U
             IconButton(onClick = vm::next) { Icon(Icons.AutoMirrored.Filled.KeyboardArrowRight, "Next month") }
         }
         if (s.filtered) Text("Filters from Discover are applied", style = MaterialTheme.typography.labelSmall, color = Palette.Clay, modifier = Modifier.padding(horizontal = 16.dp))
-        MonthGrid(s.month, s.selected, s.counts, vm::select)
+        MonthGrid(s.month, s.selected, s.counts, s.currentDate, vm::select)
         HorizontalDivider(color = Palette.Line, modifier = Modifier.padding(top = 8.dp))
         Row(Modifier.fillMaxWidth().padding(start = 16.dp, end = 8.dp), verticalAlignment = Alignment.CenterVertically) {
-            Text(s.selected.format(DateTimeFormatter.ofPattern("EEEE, MMMM d", Locale.CANADA)), style = MaterialTheme.typography.titleSmall, modifier = Modifier.weight(1f))
+            Text(relativeDayLabel(s.selected, s.currentDate, DateTimeFormatter.ofPattern("EEEE, MMMM d", Locale.CANADA)), style = MaterialTheme.typography.titleSmall, modifier = Modifier.weight(1f))
             TextButton(onClick = { onShowAgenda(s.selected) }) {
                 Icon(Icons.AutoMirrored.Outlined.ViewList, null, Modifier.size(16.dp)); Text(" Week agenda")
             }
@@ -131,7 +137,7 @@ fun CalendarScreen(onOpenEvent: (String) -> Unit, onShowAgenda: (LocalDate) -> U
 }
 
 @Composable
-private fun MonthGrid(month: YearMonth, selected: LocalDate, counts: Map<LocalDate, Int>, onSelect: (LocalDate) -> Unit) {
+private fun MonthGrid(month: YearMonth, selected: LocalDate, counts: Map<LocalDate, Int>, today: LocalDate, onSelect: (LocalDate) -> Unit) {
     val first = month.atDay(1)
     val lead = first.dayOfWeek.value - 1 // Monday-first
     val cells = lead + month.lengthOfMonth()
@@ -151,7 +157,7 @@ private fun MonthGrid(month: YearMonth, selected: LocalDate, counts: Map<LocalDa
                             val d = month.atDay(idx + 1)
                             val n = counts[d] ?: 0
                             val isSel = d == selected
-                            val isToday = d == today()
+                            val isToday = d == today
                             Column(
                                 Modifier.fillMaxSize().clip(RoundedCornerShape(10.dp))
                                     .background(if (isSel) Palette.Sage else if (isToday) Palette.SageMist else Palette.Paper)

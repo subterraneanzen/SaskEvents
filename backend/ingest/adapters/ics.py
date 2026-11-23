@@ -81,5 +81,5 @@ def parse_ics(text: str, source: dict) -> list[RawEvent]:
     return out
 
 
-def fetch(source: dict, fetcher) -> list[RawEvent]:
+def fetch(source: dict, fetcher, today=None) -> list[RawEvent]:
     return parse_ics(fetcher.get(source["url"]).text, source)

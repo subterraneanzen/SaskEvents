@@ -97,12 +97,12 @@ def apply_detail(ev: RawEvent, html: str) -> None:
     ev.status = detect_status(ev.title, (ev.description or "")[:200])
 
 
-def fetch(source: dict, fetcher) -> list[RawEvent]:
+def fetch(source: dict, fetcher, today=None) -> list[RawEvent]:
     r = fetcher.get(source["url"])
     events = parse_listing(r.text, source)
     opts = source.get("options", {})
     if opts.get("fetchDetails"):
-        horizon = date.today() + timedelta(days=int(opts.get("detailDaysAhead", 60)))
+        horizon = (today or date.today()) + timedelta(days=int(opts.get("detailDaysAhead", 60)))
         for ev in events:
             if ev.start_date > horizon or not ev.source_url.startswith("http"):
                 continue

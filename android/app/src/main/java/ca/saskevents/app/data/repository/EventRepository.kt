@@ -20,6 +20,7 @@ import ca.saskevents.app.domain.SearchArea
 import ca.saskevents.app.domain.computeDistance
 import ca.saskevents.app.domain.parseMinutes
 import ca.saskevents.app.domain.today
+import ca.saskevents.app.domain.todayFlow
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
@@ -63,11 +64,13 @@ class EventRepository(
     fun eventsBetween(from: LocalDate, to: LocalDate): Flow<List<EventItem>> =
         join(db.events().observeBetween(from.toEpochDay(), to.toEpochDay()))
 
-    fun upcoming(): Flow<List<EventItem>> = join(db.events().observeUpcoming(today().toEpochDay()))
+    @OptIn(ExperimentalCoroutinesApi::class)
+    fun upcoming(): Flow<List<EventItem>> = todayFlow.flatMapLatest { join(db.events().observeUpcoming(it.toEpochDay())) }
 
     fun event(id: String): Flow<EventItem?> = join(db.events().observe(id).map { listOfNotNull(it) }).map { it.firstOrNull() }
 
-    fun venueEvents(venueId: String): Flow<List<EventItem>> = join(db.events().observeForVenue(venueId, today().toEpochDay()))
+    @OptIn(ExperimentalCoroutinesApi::class)
+    fun venueEvents(venueId: String): Flow<List<EventItem>> = todayFlow.flatMapLatest { join(db.events().observeForVenue(venueId, it.toEpochDay())) }
 
     @OptIn(ExperimentalCoroutinesApi::class)
     fun saved(): Flow<List<EventItem>> = db.bookmarks().observeAll().flatMapLatest { bms ->

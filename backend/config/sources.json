@@ -1,5 +1,5 @@
 {
-  "_comment": "Source registry (Source Manager). Add, edit, enable/disable sources here; no app update needed. tier: 1 official venue, 2 official artist, 3 official ticketing, 4 aggregator, 5 other secondary. frequencyHours is the minimum gap between checks. adapter must be one of: amigos_html, elfsight_calendar, broadway_platform, jsonld, ics, ticketmaster_api.",
+  "_comment": "Source registry (Source Manager). Add, edit, enable/disable sources here; no app update needed. tier: 1 official venue, 2 official artist, 3 official ticketing, 4 aggregator, 5 other secondary. frequencyHours is the minimum gap between checks. adapter must be one of: amigos_html, elfsight_calendar, broadway_platform, jsonld, ics, ticketmaster_api, squarespace_blog.",
   "sources": [
     {
       "id": "amigos",
@@ -79,6 +79,17 @@
       "frequencyHours": 24,
       "options": {},
       "notes": "Additional AllEvents Saskatoon category page, expected to use the same JSON-LD format as the Capitol page. URL pattern assumed, not confirmed by hand; the ingest report shows whether it yields events."
+    },
+    {
+      "id": "sneakers-lipstick",
+      "name": "Sneakers & Lipstick – Weekend event guide",
+      "url": "https://www.sneakersandlipstick.com/home/things-to-do-in-saskatoon-weekend-events",
+      "adapter": "squarespace_blog",
+      "tier": 4,
+      "enabled": true,
+      "frequencyHours": 12,
+      "options": {"listingUrl": "https://www.sneakersandlipstick.com/home/category/saskatoon%20events", "maxPosts": 4},
+      "notes": "Saskatoon lifestyle blog (Squarespace). No calendar or feed: events are written up in blog posts, mainly the weekly weekend guide. The adapter reads that post plus the newest posts in the 'saskatoon events' category. Strong on family, market and community events. Tier 4: discovery only, never venue confirmation."
     },
     {
       "id": "bandsintown",

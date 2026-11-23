@@ -17,6 +17,7 @@ import os
 import sys
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
+from zoneinfo import ZoneInfo
 
 from .adapters import ADAPTERS
 from .adapters.ticketmaster import MissingApiKey
@@ -44,6 +45,8 @@ def run(config_dir: Path, prev_dir: Path, out_dir: Path, *, force: bool = False,
         only: set[str] | None = None, geocode: bool = True, enrich: bool = True,
         now: datetime | None = None) -> dict:
     now = now or datetime.now(timezone.utc)
+    # Adapters must use the run's clock, not the machine's, so runs (and tests) are reproducible.
+    local_today = now.astimezone(ZoneInfo("America/Regina")).date()
     venues_cfg = _load(config_dir / "venues.json")
     sources_cfg = _load(config_dir / "sources.json")["sources"]
     curated = (_load(config_dir / "artists.json", {"artists": []}) or {}).get("artists", [])
@@ -81,7 +84,7 @@ def run(config_dir: Path, prev_dir: Path, out_dir: Path, *, force: bool = False,
             continue
         st["lastAttempt"] = _iso(now)
         try:
-            evs = ADAPTERS[s["adapter"]](s, fetcher)
+            evs = ADAPTERS[s["adapter"]](s, fetcher, today=local_today)
             st.update(status="ok", lastSuccess=_iso(now), eventsDiscovered=len(evs), consecutiveFailures=0, lastError=None)
             cache_path.write_text(json.dumps({"fetchedAt": _iso(now), "events": [raw_to_json(e) for e in evs]}, indent=1))
             raws.extend(evs)

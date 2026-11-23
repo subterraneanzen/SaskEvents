@@ -20,7 +20,7 @@ import androidx.lifecycle.viewModelScope
 import ca.saskevents.app.AppContainer
 import ca.saskevents.app.data.prefs.Settings
 import ca.saskevents.app.domain.EventItem
-import ca.saskevents.app.domain.today
+import ca.saskevents.app.domain.todayFlow
 import ca.saskevents.app.ui.appViewModel
 import ca.saskevents.app.ui.components.DayHeader
 import ca.saskevents.app.ui.components.EmptyState
@@ -34,8 +34,8 @@ import kotlinx.coroutines.launch
 data class SavedState(val upcoming: List<EventItem> = emptyList(), val past: List<EventItem> = emptyList(), val settings: Settings = Settings())
 
 class SavedViewModel(private val c: AppContainer) : ViewModel() {
-    val state = combine(c.repository.saved(), c.prefs.settings) { items, s ->
-        val t = today().toEpochDay()
+    val state = combine(c.repository.saved(), c.prefs.settings, todayFlow) { items, s, day ->
+        val t = day.toEpochDay()
         val sorted = items.sortedWith(compareBy({ it.event.startEpochDay }, { it.event.startMinutes ?: Int.MAX_VALUE }))
         SavedState(sorted.filter { (it.event.endEpochDay ?: it.event.startEpochDay) >= t },
             sorted.filter { (it.event.endEpochDay ?: it.event.startEpochDay) < t }.reversed(), s)

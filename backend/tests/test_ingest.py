@@ -247,3 +247,29 @@ def test_musicbrainz_enrichment(tmp_path):
     calls = MBFetcher.calls
     enrich_artists(arts, MBFetcher(), tmp_path / "c" / "mb.json", tmp_path / "c" / "mb.json", now=now)
     assert MBFetcher.calls == calls and len(arts[0]["links"]) == 5
+
+
+def test_squarespace_blog_weekend_guide():
+    from ingest.adapters import squarespace_blog
+    html = (FX / "sneakers_weekend.html").read_text()
+    src = SRC["sneakers-lipstick"]
+    evs = {e.title: e for e in squarespace_blog.parse_post(html, src, src["url"])}
+    assert set(evs) == {"Test Festival of Lights", "Test Holiday Craft Market", "Test Comedy Night",
+                        "Test Family Skate", "Test Brunch Pop-up"}  # no "Ongoing"/"Newsletter signup"/footer
+    lights = evs["Test Festival of Lights"]
+    assert (lights.start_date, lights.end_date) == (date(2026, 11, 20), date(2026, 12, 31))
+    assert lights.start_time == time(17, 0) and lights.venue_name == "Example Gardens"
+    assert (lights.price_min, lights.price_max) == (6, 12) and lights.ticket_url == "https://example.org/lights"
+    mkt = evs["Test Holiday Craft Market"]
+    assert mkt.start_date == date(2026, 11, 20) and mkt.start_time == time(10, 0) and mkt.end_time == time(16, 0)
+    assert (mkt.venue_name, mkt.venue_address) == ("Example Hall", "123 Main St")
+    assert mkt.is_free is True
+    com = evs["Test Comedy Night"]
+    assert com.start_time == time(20, 0) and com.venue_name == "The Example Room" and com.age_text == "19+" and com.price_min == 20
+    # Weekday headers resolve against the post's last-modified date (Thu Nov 19), never the machine clock.
+    skate = evs["Test Family Skate"]
+    assert skate.start_date == date(2026, 11, 21) and skate.start_time == time(13, 0) and skate.end_time == time(15, 0)
+    brunch = evs["Test Brunch Pop-up"]
+    assert brunch.start_date == date(2026, 11, 22) and brunch.status == "cancelled" and brunch.venue_name == "Example Cafe"
+    assert all(e.performers == [] for e in evs.values())
+    assert len({e.source_key for e in evs.values()}) == 5

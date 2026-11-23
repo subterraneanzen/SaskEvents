@@ -62,6 +62,7 @@ import androidx.compose.ui.unit.dp
 import ca.saskevents.app.domain.DatePreset
 import ca.saskevents.app.domain.EventItem
 import ca.saskevents.app.domain.timeLabel
+import ca.saskevents.app.domain.relativeDayLabel
 import ca.saskevents.app.domain.today
 import ca.saskevents.app.domain.weekStart
 import ca.saskevents.app.ui.appViewModel
@@ -99,11 +100,10 @@ fun DiscoverScreen(onOpenEvent: (String) -> Unit, jumpTo: LocalDate? = null, onJ
             Column(Modifier.weight(1f)) {
                 Text("What's on in ${s.settings.cityName}", style = MaterialTheme.typography.headlineSmall)
                 val label = if (s.isWeek) {
-                    val thisWeek = s.rangeStart == weekStart(today())
+                    val thisWeek = s.rangeStart == weekStart(s.currentDate)
                     (if (thisWeek) "This week · " else "") + s.rangeStart.format(SHORT) + " – " + s.rangeEnd.format(SHORT)
                 } else when (s.filters.datePreset) {
-                    DatePreset.TODAY -> "Today · " + s.rangeStart.format(SHORT)
-                    DatePreset.TOMORROW -> "Tomorrow · " + s.rangeStart.format(SHORT)
+                    DatePreset.TODAY, DatePreset.TOMORROW -> relativeDayLabel(s.rangeStart, s.currentDate, SHORT)
                     DatePreset.WEEKEND -> "This weekend · " + s.rangeStart.format(SHORT) + " – " + s.rangeEnd.format(SHORT)
                     else -> s.rangeStart.format(SHORT) + " – " + s.rangeEnd.format(SHORT)
                 }
@@ -139,7 +139,7 @@ fun DiscoverScreen(onOpenEvent: (String) -> Unit, jumpTo: LocalDate? = null, onJ
                 IconButton(onClick = vm::prevWeek) { Icon(Icons.AutoMirrored.Filled.KeyboardArrowLeft, "Previous week") }
             }
             AssistChip(
-                onClick = { vm.thisWeek(); scope.launch { listState.scrollToItem(todayIndex(s.days, s.highlights.isNotEmpty())) } },
+                onClick = { vm.thisWeek(); scope.launch { listState.scrollToItem(todayIndex(s.days, s.highlights.isNotEmpty(), today())) } },
                 label = { Text("Today") },
                 colors = AssistChipDefaults.assistChipColors(containerColor = Palette.SageMist, labelColor = Palette.SageDeep),
                 border = BorderStroke(0.dp, Palette.SageMist),
@@ -175,11 +175,11 @@ fun DiscoverScreen(onOpenEvent: (String) -> Unit, jumpTo: LocalDate? = null, onJ
                 item(key = "hl") { Highlights(s.highlights, onOpenEvent) }
             }
             s.days.forEach { (day, dayItems) ->
-                if (dayItems.isEmpty() && s.isWeek && s.filters.isEmpty && !day.isBefore(today())) {
-                    stickyHeader(key = "h$day") { DayHeader(day.format(DAY_FMT), "Nothing listed", highlight = day == today()) }
+                if (dayItems.isEmpty() && s.isWeek && s.filters.isEmpty && !day.isBefore(s.currentDate)) {
+                    stickyHeader(key = "h$day") { DayHeader(relativeDayLabel(day, s.currentDate, DAY_FMT), "Nothing listed", highlight = day == s.currentDate) }
                 } else if (dayItems.isNotEmpty()) {
                     stickyHeader(key = "h$day") {
-                        DayHeader(if (day == today()) "Today · " + day.format(DAY_FMT) else day.format(DAY_FMT), "${dayItems.size}", highlight = day == today())
+                        DayHeader(relativeDayLabel(day, s.currentDate, DAY_FMT), "${dayItems.size}", highlight = day == s.currentDate)
                     }
                     items(dayItems, key = { "${day}_${it.event.id}" }) { item ->
                         EventRow(item, s.settings.cityName, onClick = { onOpenEvent(item.event.id) }, onBookmark = { vm.toggleBookmark(item.event) })
@@ -194,10 +194,10 @@ fun DiscoverScreen(onOpenEvent: (String) -> Unit, jumpTo: LocalDate? = null, onJ
     }
 }
 
-private fun todayIndex(days: List<Pair<LocalDate, List<EventItem>>>, hasHighlights: Boolean): Int {
+private fun todayIndex(days: List<Pair<LocalDate, List<EventItem>>>, hasHighlights: Boolean, today: LocalDate): Int {
     var idx = if (hasHighlights) 1 else 0
     for ((d, items) in days) {
-        if (d == today()) return idx
+        if (d == today) return idx
         idx += 1 + items.size
     }
     return 0
