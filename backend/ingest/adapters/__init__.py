@@ -1,4 +1,4 @@
-from . import amigos, broadway, elfsight, ics, jsonld, squarespace_blog, ticketmaster
+from . import amigos, broadway, elfsight, ics, jsonld, jumpcomedy, squarespace_blog, ticketmaster
 
 ADAPTERS = {
     "amigos_html": amigos.fetch,
@@ -8,6 +8,7 @@ ADAPTERS = {
     "ics": ics.fetch,
     "ticketmaster_api": ticketmaster.fetch,
     "squarespace_blog": squarespace_blog.fetch,
+    "jumpcomedy_widget": jumpcomedy.fetch,
 }
 
 

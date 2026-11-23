@@ -1,5 +1,5 @@
 {
-  "_comment": "Source registry (Source Manager). Add, edit, enable/disable sources here; no app update needed. tier: 1 official venue, 2 official artist, 3 official ticketing, 4 aggregator, 5 other secondary. frequencyHours is the minimum gap between checks. adapter must be one of: amigos_html, elfsight_calendar, broadway_platform, jsonld, ics, ticketmaster_api, squarespace_blog.",
+  "_comment": "Source registry (Source Manager). Add, edit, enable/disable sources here; no app update needed. tier: 1 official venue, 2 official artist, 3 official ticketing, 4 aggregator, 5 other secondary. frequencyHours is the minimum gap between checks. adapter must be one of: amigos_html, elfsight_calendar, broadway_platform, jsonld, ics, ticketmaster_api, squarespace_blog, jumpcomedy_widget.",
   "sources": [
     {
       "id": "amigos",
@@ -90,6 +90,18 @@
       "frequencyHours": 12,
       "options": {"listingUrl": "https://www.sneakersandlipstick.com/home/category/saskatoon%20events", "maxPosts": 4},
       "notes": "Saskatoon lifestyle blog (Squarespace). No calendar or feed: events are written up in blog posts, mainly the weekly weekend guide. The adapter reads that post plus the newest posts in the 'saskatoon events' category. Strong on family, market and community events. Tier 4: discovery only, never venue confirmation."
+    },
+    {
+      "id": "artbar",
+      "name": "Art Bar – Main Stage calendar (Jump Comedy ticketing)",
+      "url": "https://artbartheatre.com/main-stage",
+      "adapter": "jumpcomedy_widget",
+      "tier": 1,
+      "venueId": "art-bar",
+      "enabled": true,
+      "frequencyHours": 12,
+      "options": {"widgetIds": [8, 9], "venueAgePolicy": "19+ (venue policy)"},
+      "notes": "artbartheatre.com is a GoDaddy site with no event markup of its own. Its Main Stage page embeds two Jump Comedy (jumpblvd.com) event-list widgets (ids 8 and 9, same shows) that load public JSON from amplify.jumpcomedy.com/store/widgets/<id>: one product per show, each showtime with local start time, prices (regular and early bird) and stock. The adapter reads that JSON; robots.txt there only disallows /e/mau1/. Ticket link is the Jump Comedy event page unless the venue names another seller (Showpass, Eventbrite). Age is the venue's stated 19+ policy. The FOH page (open mics) has no event widget."
     },
     {
       "id": "bandsintown",
